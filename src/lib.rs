@@ -1,3 +1,4 @@
-pub mod plugin;
-pub mod shared_data;
 pub mod app;
+pub mod plugin;
+pub mod pluginlist;
+pub mod shared_data;
