@@ -1,3 +1,5 @@
+#![no_std]
+
 pub mod app;
 pub mod plugin;
 pub mod pluginlist;
