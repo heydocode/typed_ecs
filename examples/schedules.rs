@@ -1,8 +1,8 @@
-use typed_ecs::{app::App, plugin::Plugin};
+use typed_ecs::{app::App, plugin::Plugin, shared_data::SharedData};
 
 fn main() {
     struct Example(u64);
-    impl Plugin for Example {
+    impl<SD: SharedData> Plugin<SD> for Example {
         fn build() -> Self {
             Self(0)
         }

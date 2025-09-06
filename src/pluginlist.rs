@@ -6,7 +6,7 @@ pub trait PluginList<SD: SharedData> {
     fn build_all() -> Self;
 }
 
-pub trait AllocatedPluginList<SD: SharedData>: PluginList<SD> {
+pub trait BuiltPluginList<SD: SharedData>: PluginList<SD> {
     /// Recursively calls `startup` method for each Plugin of the PluginList.
     /// This is using Head/Tail recursion, which is optimized away by the compiler.
     /// So in release mode, this must be as performant as manual per-plugin method invocation.
@@ -72,7 +72,7 @@ impl<SD: SharedData, Head: Plugin<SD>, Tail: PluginList<SD>> PluginList<SD> for 
     }
 }
 
-impl<SD: SharedData> AllocatedPluginList<SD> for () {
+impl<SD: SharedData> BuiltPluginList<SD> for () {
     fn startup_all(&mut self) {}
 
     fn pre_update_all(&mut self) {}
@@ -92,8 +92,8 @@ impl<SD: SharedData> AllocatedPluginList<SD> for () {
     fn on_exit_all(&mut self) {}
 }
 
-impl<SD: SharedData, Head: Plugin<SD>, Tail: PluginList<SD> + AllocatedPluginList<SD>>
-    AllocatedPluginList<SD> for (Head, Tail)
+impl<SD: SharedData, Head: Plugin<SD>, Tail: PluginList<SD> + BuiltPluginList<SD>>
+    BuiltPluginList<SD> for (Head, Tail)
 {
     fn startup_all(&mut self) {
         self.0.startup();
