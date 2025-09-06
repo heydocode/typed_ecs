@@ -1,3 +1,5 @@
+use std::marker::PhantomData;
+
 use crate::{
     app::ShouldExit,
     shared_data::{PhantomSharedData, SharedData},
@@ -67,12 +69,6 @@ pub trait Plugin<SD: SharedData = PhantomSharedData> {
     /// Schedule, runs after `update_exit_status`.
     #[inline(always)]
     fn update_exit_status_with_sd(&self, _should_exit: &mut ShouldExit, _sd: &SD) {}
-    /// This method gets called as soon as the ECS holder is dropped.
-    /// There's no guaranties that all Plugins will have their exit
-    /// method called.
-    /// Note that the only two ways this function can get runned are:
-    /// - ECS holder drops
-    /// - a plugin has requested exit
     /// This method runs after `update_exit_status_with_sd` schedule if
     /// a plugin has requested shutdown.
     #[inline(always)]
@@ -82,5 +78,11 @@ pub trait Plugin<SD: SharedData = PhantomSharedData> {
 impl<SD: SharedData> Plugin<SD> for () {
     fn build() -> Self {
         ()
+    }
+}
+
+impl<SD: SharedData> Plugin<SD> for PhantomData<()> {
+    fn build() -> Self {
+        PhantomData
     }
 }

@@ -6,22 +6,7 @@ pub trait PluginList<SD: SharedData> {
     fn build_all() -> Self;
 }
 
-pub trait UnallocatedPluginList<SD: SharedData>: PluginList<SD> {
-    type Allocated: AllocatedPluginList<SD>;
-
-    /// Appends a plugin in LIFO order to the current PluginList
-    fn add_plugin<P: Plugin<SD>>(&self, _plugin: P) -> PhantomData<(P, Self)>
-    where
-        Self: UnallocatedPluginList<SD>;
-    /// Allocates the PluginList: instead of allocating on each plugin add,
-    /// allocate only when you've added all of your plugins.
-    fn build() -> Self::Allocated;
-}
-
 pub trait AllocatedPluginList<SD: SharedData>: PluginList<SD> {
-    /// Recursively calls `Plugin::build` for each Plugin of the PluginList.
-    /// In release mode, should be as performant as manual per-plugin method invocation.
-    fn instantiate_all<P: Plugin<SD>, PL: PluginList<SD> + AllocatedPluginList<SD>>() -> Self;
     /// Recursively calls `startup` method for each Plugin of the PluginList.
     /// This is using Head/Tail recursion, which is optimized away by the compiler.
     /// So in release mode, this must be as performant as manual per-plugin method invocation.
@@ -57,6 +42,7 @@ pub trait AllocatedPluginList<SD: SharedData>: PluginList<SD> {
     /// Recursively calls `on_exit` method for each Plugin of the PluginList.
     /// This is using Head/Tail recursion, which is optimized away by the compiler.
     /// So in release mode, this must be as performant as manual per-plugin method invocation.
+    /// This is ONLY executed when ShouldExit is set to true and when the ECS loop ends.
     fn on_exit_all(&mut self);
 }
 
@@ -72,26 +58,21 @@ impl<SD: SharedData> PluginList<SD> for () {
     }
 }
 
-impl<SD: SharedData> UnallocatedPluginList<SD> for PhantomData<()> {
-    type Allocated = ();
-
-    fn add_plugin<P: Plugin<SD>>(&self, _plugin: P) -> PhantomData<(P, Self)>
-    where
-        Self: UnallocatedPluginList<SD>,
-    {
+impl<SD: SharedData, Head: Plugin<SD>, Tail: PluginList<SD>> PluginList<SD>
+    for PhantomData<(Head, Tail)>
+{
+    fn build_all() -> Self {
         PhantomData
     }
+}
 
-    fn build() -> Self::Allocated {
-        ()
+impl<SD: SharedData, Head: Plugin<SD>, Tail: PluginList<SD>> PluginList<SD> for (Head, Tail) {
+    fn build_all() -> Self {
+        (Head::build(), Tail::build_all())
     }
 }
 
 impl<SD: SharedData> AllocatedPluginList<SD> for () {
-    fn instantiate_all<P: Plugin<SD>, PL: PluginList<SD> + AllocatedPluginList<SD>>() -> Self {
-        ()
-    }
-
     fn startup_all(&mut self) {}
 
     fn pre_update_all(&mut self) {}
@@ -111,46 +92,9 @@ impl<SD: SharedData> AllocatedPluginList<SD> for () {
     fn on_exit_all(&mut self) {}
 }
 
-impl<SD: SharedData, Head: Plugin<SD>, Tail: PluginList<SD>> PluginList<SD>
-    for PhantomData<(Head, Tail)>
-{
-    fn build_all() -> Self {
-        PhantomData
-    }
-}
-
-impl<SD: SharedData, Head: Plugin<SD>, Tail: UnallocatedPluginList<SD>> UnallocatedPluginList<SD>
-    for PhantomData<(Head, Tail)>
-{
-    type Allocated = (Head, Tail::Allocated);
-
-    fn add_plugin<P: Plugin<SD>>(&self, _plugin: P) -> PhantomData<(P, Self)>
-    where
-        Self: UnallocatedPluginList<SD>,
-    {
-        PhantomData
-    }
-
-    fn build() -> Self::Allocated {
-        (Head::build(), Tail::build())
-    }
-}
-
-impl<SD: SharedData, Head: Plugin<SD>, Tail: PluginList<SD>> PluginList<SD> for (Head, Tail) {
-    fn build_all() -> Self {
-        (Head::build(), Tail::build_all())
-    }
-}
-
 impl<SD: SharedData, Head: Plugin<SD>, Tail: PluginList<SD> + AllocatedPluginList<SD>>
     AllocatedPluginList<SD> for (Head, Tail)
 {
-    /// Recursively calls `Plugin::build` for each Plugin of the PluginList.
-    /// In release mode, should be as performant as manual per-plugin method invocation.
-    fn instantiate_all<P: Plugin<SD>, PL: PluginList<SD> + AllocatedPluginList<SD>>() -> Self {
-        (Head::build(), Tail::build_all())
-    }
-
     fn startup_all(&mut self) {
         self.0.startup();
         self.1.startup_all();
@@ -194,82 +138,5 @@ impl<SD: SharedData, Head: Plugin<SD>, Tail: PluginList<SD> + AllocatedPluginLis
     fn on_exit_all(&mut self) {
         self.0.on_exit();
         self.1.on_exit_all();
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use std::marker::PhantomData;
-
-    // Minimal SharedData and Plugin for testing
-    struct DummySharedData;
-    impl SharedData for DummySharedData {
-        fn build() -> Self {
-            Self
-        }
-    }
-
-    #[derive(Debug, PartialEq)]
-    struct ExamplePlugin;
-    impl Plugin<DummySharedData> for ExamplePlugin {
-        fn build() -> Self {
-            Self
-        }
-    }
-
-    #[derive(Debug, PartialEq)]
-    struct ExamplePlugin2;
-    impl Plugin<DummySharedData> for ExamplePlugin2 {
-        fn build() -> Self {
-            Self
-        }
-    }
-
-    #[test]
-    fn pluginlist_instantiation() {
-        // The tail must itself be an UnallocatedPluginList, so end it with PhantomData<()>.
-        type Unallocated = PhantomData<(
-            ExamplePlugin,
-            PhantomData<(ExamplePlugin2, PhantomData<()>)>,
-        )>;
-        type ExpectedAllocated = (ExamplePlugin, (ExamplePlugin2, ()));
-
-        let allocated: <Unallocated as UnallocatedPluginList<DummySharedData>>::Allocated =
-            <Unallocated as UnallocatedPluginList<DummySharedData>>::build();
-
-        let _: ExpectedAllocated = allocated;
-        assert_eq!(
-            allocated,
-            (ExamplePlugin::build(), (ExamplePlugin2::build(), ())),
-            "error!"
-        )
-    }
-
-    #[test]
-    fn plugins_orderings() {
-        let plugins: PhantomData<(ExamplePlugin, PhantomData<()>)> =
-            PhantomData::<()>.add_plugin(ExamplePlugin);
-        let second_plugins: PhantomData<(
-            ExamplePlugin2,
-            PhantomData<(ExamplePlugin, PhantomData<()>)>,
-        )> = plugins.add_plugin(ExamplePlugin2);
-
-        assert_eq!(plugins, PhantomData::<(ExamplePlugin, PhantomData<()>)>);
-        assert_eq!(
-            second_plugins,
-            PhantomData::<(
-                ExamplePlugin2,
-                PhantomData<(ExamplePlugin, PhantomData<()>)>
-            )>
-        );
-    }
-
-    /// This test ensures the compiler accepts the void type as a plugin.
-    #[test]
-    fn void_plugins() {
-        let base_plugins = PhantomData::<()>.add_plugin(ExamplePlugin);
-        let new_plugins = base_plugins.add_plugin(()).add_plugin(());
-        let _ = new_plugins.add_plugin(());
     }
 }
