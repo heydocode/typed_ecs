@@ -35,7 +35,7 @@ impl App {
             should_exit: PhantomData,
         }
     }
-
+  
     pub fn new_with_world<SD: SharedData>() -> AppBuilder<SD, ()> {
         AppBuilder::<SD, ()> {
             plugins: PhantomData,
