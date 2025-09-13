@@ -5,7 +5,7 @@ use crate::{
     shared_data::{PhantomSharedData, SharedData},
 };
 
-pub trait Plugin<SD: SharedData = PhantomSharedData> {
+pub trait Plugin<SD: SharedData> {
     /// Return an instance of the Plugin
     fn build() -> Self;
     /// As soon as the App built instance is runned
@@ -76,6 +76,7 @@ pub trait Plugin<SD: SharedData = PhantomSharedData> {
 }
 
 impl<SD: SharedData> Plugin<SD> for () {
+    #[inline(always)]
     fn build() -> Self {
         ()
     }

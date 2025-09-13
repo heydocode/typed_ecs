@@ -2,8 +2,12 @@
 name = "typed_ecs"
 version = "0.0.1"
 edition = "2024"
-
-[dependencies]
-
-[[example]]
-name = "schedules"
+description = "A no_std, no_alloc Entity Component System with compile-time guarantees"
+authors = ["heydocode"]
+license = "MIT"
+repository = "https://github.com/heydocode/typed_ecs"
+documentation = "https://docs.rs/typed_ecs"
+readme = "README.md"
+keywords = ["ecs", "no-std", "no-alloc", "game", "embedded"]
+categories = ["no-std", "embedded", "game-development"]
+publish = true

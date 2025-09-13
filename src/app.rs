@@ -2,7 +2,7 @@ use core::marker::PhantomData;
 
 use crate::{
     plugin::Plugin,
-    pluginlist::{AllocatedPluginList, PluginList},
+    pluginlist::{BuiltPluginList, PluginList},
     shared_data::{PhantomSharedData, SharedData},
 };
 
@@ -28,16 +28,16 @@ impl ShouldExit {
 pub struct App;
 
 impl App {
-    pub fn new() -> StaticApp<PhantomSharedData, ()> {
-        StaticApp::<PhantomSharedData, ()> {
+    pub fn new() -> AppBuilder<PhantomSharedData, ()> {
+        AppBuilder::<PhantomSharedData, ()> {
             plugins: PhantomData,
             shared_data: PhantomData,
             should_exit: PhantomData,
         }
     }
-
-    pub fn new_with_world<SD: SharedData>() -> StaticApp<SD, ()> {
-        StaticApp::<SD, ()> {
+  
+    pub fn new_with_world<SD: SharedData>() -> AppBuilder<SD, ()> {
+        AppBuilder::<SD, ()> {
             plugins: PhantomData,
             shared_data: PhantomData,
             should_exit: PhantomData,
@@ -45,23 +45,23 @@ impl App {
     }
 }
 
-pub struct StaticApp<SD: SharedData, PL: PluginList<SD>> {
+pub struct AppBuilder<SD: SharedData, PL: PluginList<SD>> {
     plugins: PhantomData<PL>,
     shared_data: PhantomData<SD>,
     should_exit: PhantomData<ShouldExit>,
 }
 
-impl<SD: SharedData, PL: PluginList<SD>> StaticApp<SD, PL> {
-    pub fn add_plugin<P: Plugin<SD>>(&self) -> StaticApp<SD, (P, PL)> {
-        StaticApp::<SD, (P, PL)> {
+impl<SD: SharedData, PL: PluginList<SD>> AppBuilder<SD, PL> {
+    pub fn add_plugin<P: Plugin<SD>>(&self) -> AppBuilder<SD, (P, PL)> {
+        AppBuilder::<SD, (P, PL)> {
             plugins: PhantomData,
             shared_data: PhantomData::<SD>,
             should_exit: PhantomData::<ShouldExit>,
         }
     }
 
-    pub fn build(&self) -> RuntimeApp<SD, PL> where PL: AllocatedPluginList<SD> {
-        RuntimeApp::<SD, PL> {
+    pub fn build(&self) -> BuiltApp<SD, PL> where PL: BuiltPluginList<SD> {
+        BuiltApp::<SD, PL> {
             plugins: PL::build_all(),
             shared_data: SD::build(),
             should_exit: ShouldExit::build(),
@@ -69,13 +69,13 @@ impl<SD: SharedData, PL: PluginList<SD>> StaticApp<SD, PL> {
     }
 }
 
-pub struct RuntimeApp<SD: SharedData, PL: PluginList<SD> + AllocatedPluginList<SD>> {
+pub struct BuiltApp<SD: SharedData, PL: PluginList<SD> + BuiltPluginList<SD>> {
     plugins: PL,
     shared_data: SD,
     should_exit: ShouldExit,
 }
 
-impl<SD: SharedData, PL: PluginList<SD> + AllocatedPluginList<SD>> RuntimeApp<SD, PL> {
+impl<SD: SharedData, PL: PluginList<SD> + BuiltPluginList<SD>> BuiltApp<SD, PL> {
     pub fn run(mut self) {
         let plugins = &mut self.plugins;
         let sd = &mut self.shared_data;
