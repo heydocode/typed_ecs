@@ -2,7 +2,7 @@ use core::marker::PhantomData;
 
 use crate::{
     app::ShouldExit,
-    shared_data::{PhantomSharedData, SharedData},
+    shared_data::{SharedData},
 };
 
 pub trait Plugin<SD: SharedData> {
