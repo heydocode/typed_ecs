@@ -1,7 +1,7 @@
 # typed_ecs
 
 [![no_std](https://img.shields.io/badge/no__std-supported-brightgreen)](https://docs.rust-embedded.org/book/intro/no-std.html)
-[![Alloc-free](https://img.shields.io/badge/alloc--free-supported-brightgreen)](https://doc.rust-lang.org/alloc/)
+[![Alloc-free](https://img.shields.io/badge/no__alloc-supported-brightgreen)](https://doc.rust-lang.org/alloc/)
 [![License](https://img.shields.io/badge/license-MIT-orange)](https://github.com/heydocode/typed_ecs)
 
 A `no_std` and `no-alloc` tiny ECS written in Rust, which provides strong compile-time guarantees.
