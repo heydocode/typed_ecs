@@ -76,6 +76,7 @@ pub trait Plugin<SD: SharedData> {
 }
 
 impl<SD: SharedData> Plugin<SD> for () {
+    #[inline(always)]
     fn build() -> Self {
         ()
     }
