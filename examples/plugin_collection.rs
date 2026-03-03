@@ -63,6 +63,7 @@ impl<SD: SharedData + AdditionalRequirement> Plugin<SD> for CtrlCHandler {
     }
     
     fn startup_ref_sd(&self, _sd: &SD) {
+        println!("Press Ctrl + C to stop the example!\n(tiny-ctrlc crate not supported on Windows, so you need to kill the process if on Windows)");
         ctrlc_tiny::init_ctrlc().unwrap();
     }
 }
