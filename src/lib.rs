@@ -2,5 +2,5 @@
 
 pub mod app;
 pub mod plugin;
-pub mod pluginlist;
+pub mod plugin_collection;
 pub mod shared_data;

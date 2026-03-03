@@ -11,3 +11,9 @@ readme = "README.md"
 keywords = ["ecs", "no-std", "no-alloc", "game", "embedded"]
 categories = ["no-std", "embedded", "game-development"]
 publish = true
+
+[workspace]
+members = ["macros"]
+
+[dependencies]
+macros = { path = "macros" }

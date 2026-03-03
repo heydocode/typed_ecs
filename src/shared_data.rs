@@ -64,3 +64,5 @@ impl SharedData for PhantomSharedData {
         Self
     }
 }
+
+pub trait VoidSDRequirement {}
