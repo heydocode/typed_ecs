@@ -17,3 +17,6 @@ members = ["macros"]
 
 [dependencies]
 macros = { path = "macros" }
+
+[dev-dependencies]
+ctrlc-tiny = "*"

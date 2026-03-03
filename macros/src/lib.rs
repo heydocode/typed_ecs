@@ -4,8 +4,9 @@ use ::quote::quote;
 use ::syn::{punctuated::Punctuated, *};
 use quote::format_ident;
 
+
 #[proc_macro]
-pub fn assemble_collection(input: TokenStream) -> TokenStream {
+pub fn generate_collection(input: TokenStream) -> TokenStream {
     let types = parse_macro_input!(
         input with Punctuated::<Type, Token![,]>::parse_terminated
     );
@@ -21,7 +22,7 @@ pub fn assemble_collection(input: TokenStream) -> TokenStream {
             let field_name = format_ident!("{}", ident_str.to_lowercase());
             fields.push(field_name.clone());
             quote_fields.push(quote! {
-                pub #field_name: #ty
+                #field_name: #ty
             });
             types_s.push(ident_str);
         } else {
@@ -34,21 +35,22 @@ pub fn assemble_collection(input: TokenStream) -> TokenStream {
     let types: Vec<syn::Ident> = types_s.iter().map(|s| format_ident!("{}", s)).collect();
 
     let expanded = quote! {
-        {
-            // Inner scope, have to return ready PluginCollection, or buildable phantomdata.
-            // Or directly the App? It seems quite complex to keep SD generic.
-            struct Helper<SD: SharedData, T: Plugin<SD>>(T);
-            trait AssertImpl { fn assert() {} }
-            impl<SD: SharedData, T: Plugin<SD>> AssertImpl for Helper<T> {}
-
-            #( Helper::<#types>::assert(); )*
-
-            struct GeneratedPluginCollection<SD: SharedData> {
-                __sd: PhantomData<SD>,
+            use core::marker::PhantomData;
+        
+            struct GeneratedPluginCollection<SD> {
                 #(#quote_fields,)*
+                _marker: PhantomData<SD>
             }
 
-            impl <SD: SharedData>PluginCollection<SD> for GeneratedPluginCollection<SD> {
+            impl <SD>PluginCollection<SD> for GeneratedPluginCollection<SD>
+            where SD: SharedData, 
+            // Even if this appears to do nothing as the hard check is done
+            // in build_generated_collection, never remove it: it allows
+            // lazy trait evaluation.
+            #( #types: Plugin<SD>, )*
+            
+            {
+                    
                 #[inline(always)]
                 fn startup_ref_sd_all(&self, sd: &SD) {
                     #( self.#idents.startup_ref_sd(sd); )*
@@ -74,11 +76,11 @@ pub fn assemble_collection(input: TokenStream) -> TokenStream {
                     #( self.#idents.update_mutref_sd(sd); )*
                 }
                 #[inline(always)]
-                fn post_ref_sd_update_all(&self, sd: &SD) {
+                fn post_update_ref_sd_all(&self, sd: &SD) {
                     #( self.#idents.post_update_ref_sd(sd); )*
                 }
                 #[inline(always)]
-                fn post_mutref_sd_update_all(&self, sd: &mut SD) {
+                fn post_update_mutref_sd_all(&self, sd: &mut SD) {
                     #( self.#idents.post_update_mutref_sd(sd); )*
                 }
                 #[inline(always)]
@@ -89,14 +91,20 @@ pub fn assemble_collection(input: TokenStream) -> TokenStream {
                 fn on_exit_all(&self, sd: &SD) {
                     #( self.#idents.on_exit(sd); )*
                 }
+
             }
 
-            // TODO! Maybe bring plugingroups back - they are very interesting because the SD requirements are enforced by the compiler.
-            // In this new way of doing things the collection could have a field, that is a phantom data of all plugins added together, and
-            // so their common SD. What is even cooler is that the individual SharedData requirements are saved individually - plugin per plugin.
-
-            PhantomData::new(GeneratedPluginCollection)
-        }
+            const fn build_generated_collection<SD>()
+            -> GeneratedPluginCollection<SD> 
+            where 
+            SD: SharedData,
+                #( #types: Plugin<SD>, )*
+            {
+                GeneratedPluginCollection::<SD> {
+                    #(#quote_fields,)*
+                    _marker: PhantomData
+                }
+            }
     };
 
     TokenStream::from(expanded)

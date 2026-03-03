@@ -2,7 +2,7 @@ use core::marker::PhantomData;
 
 use crate::{
     plugin::Plugin,
-    pluginlist::{BuiltPluginList, PluginList},
+    plugin_collection::PluginCollection,
     shared_data::{PhantomSharedData, SharedData},
 };
 
@@ -19,81 +19,40 @@ impl ShouldExit {
     pub fn request_exit(&mut self) {
         self.0 = true;
     }
-
-    pub fn build() -> Self {
-        Self(false)
-    }
 }
 
-pub struct App;
-
-impl App {
-    pub fn new() -> AppBuilder<PhantomSharedData, ()> {
-        AppBuilder::<PhantomSharedData, ()> {
-            plugins: PhantomData,
-            shared_data: PhantomData,
-            should_exit: PhantomData,
-        }
-    }
-  
-    pub fn new_with_world<SD: SharedData>() -> AppBuilder<SD, ()> {
-        AppBuilder::<SD, ()> {
-            plugins: PhantomData,
-            shared_data: PhantomData,
-            should_exit: PhantomData,
-        }
-    }
-}
-
-pub struct AppBuilder<SD: SharedData, PL: PluginList<SD>> {
-    plugins: PhantomData<PL>,
-    shared_data: PhantomData<SD>,
-    should_exit: PhantomData<ShouldExit>,
-}
-
-impl<SD: SharedData, PL: PluginList<SD>> AppBuilder<SD, PL> {
-    pub fn add_plugin<P: Plugin<SD>>(&self) -> AppBuilder<SD, (P, PL)> {
-        AppBuilder::<SD, (P, PL)> {
-            plugins: PhantomData,
-            shared_data: PhantomData::<SD>,
-            should_exit: PhantomData::<ShouldExit>,
-        }
-    }
-
-    pub fn build(&self) -> BuiltApp<SD, PL> where PL: BuiltPluginList<SD> {
-        BuiltApp::<SD, PL> {
-            plugins: PL::build_all(),
-            shared_data: SD::build(),
-            should_exit: ShouldExit::build(),
-        }
-    }
-}
-
-pub struct BuiltApp<SD: SharedData, PL: PluginList<SD> + BuiltPluginList<SD>> {
-    plugins: PL,
+pub struct App<SD: SharedData, PC: PluginCollection<SD>> {
     shared_data: SD,
+    plugin_collection: PC,
     should_exit: ShouldExit,
 }
 
-impl<SD: SharedData, PL: PluginList<SD> + BuiltPluginList<SD>> BuiltApp<SD, PL> {
-    pub fn run(mut self) {
-        let plugins = &mut self.plugins;
-        let sd = &mut self.shared_data;
-        let should_exit = &mut self.should_exit;
+impl<SD: SharedData, PC: PluginCollection<SD>> App<SD, PC> {
+    pub fn new(plugin_collection: PC) -> Self {
+        Self {
+            shared_data: SD::build(),
+            plugin_collection,
+            should_exit: ShouldExit(false),
+        }
+    }
 
-        plugins.startup_all();
+    pub fn run(self) {
+        let plugin_collection = &self.plugin_collection;
+        let mut sd = self.shared_data;
+        let mut should_exit = self.should_exit;
+
+        plugin_collection.startup_ref_sd_all(&sd);
+        plugin_collection.startup_mutref_sd_all(&mut sd);
 
         while !&should_exit.0 {
-            plugins.pre_update_all();
-            plugins.update_all();
-            plugins.post_update_all();
-
-            plugins.access_ref_sd_all(&sd);
-            plugins.access_mutref_sd_all(sd);
-
-            plugins.update_exit_status_all(should_exit);
-            plugins.update_exit_status_with_sd_all(should_exit, &sd);
+            plugin_collection.pre_update_ref_sd_all(&sd);
+            plugin_collection.pre_update_mutref_sd_all(&mut sd);
+            plugin_collection.update_ref_sd_all(&sd);
+            plugin_collection.update_mutref_sd_all(&mut sd);
+            plugin_collection.post_update_ref_sd_all(&sd);
+            plugin_collection.post_update_mutref_sd_all(&mut sd);
+            plugin_collection.update_exit_status_with_sd_all(&mut should_exit, &sd);
         }
-        plugins.on_exit_all();
+        plugin_collection.on_exit_all(&sd);
     }
 }

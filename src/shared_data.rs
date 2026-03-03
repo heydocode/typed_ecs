@@ -4,7 +4,7 @@
 /// the SharedData instance.
 ///
 /// In other words, each plugin can request the SharedData to have certain
-/// methods, if it needs to talk with another plugin via the SharedData instance.
+/// methods.
 ///
 /// Example:
 /// ```rust
@@ -64,5 +64,3 @@ impl SharedData for PhantomSharedData {
         Self
     }
 }
-
-pub trait VoidSDRequirement {}
