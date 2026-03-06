@@ -2,9 +2,17 @@ use crate::{app::ShouldExit, shared_data::SharedData};
 
 pub trait Plugin<SD: SharedData> {
     #[inline(always)]
+    fn pre_startup_ref_sd(&self, _sd: &SD) {}
+    #[inline(always)]
+    fn pre_startup_mutref_sd(&self, _sd: &mut SD) {}
+    #[inline(always)]
     fn startup_ref_sd(&self, _sd: &SD) {}
     #[inline(always)]
     fn startup_mutref_sd(&self, _sd: &mut SD) {}
+    #[inline(always)]
+    fn post_startup_ref_sd(&self, _sd: &SD) {}
+    #[inline(always)]
+    fn post_startup_mutref_sd(&self, _sd: &mut SD) {}
     #[inline(always)]
     fn pre_update_ref_sd(&self, _sd: &SD) {}
     #[inline(always)]

@@ -52,6 +52,31 @@ pub fn generate_collection(input: TokenStream) -> TokenStream {
             
             {
                 #[inline(always)]
+                fn pre_startup_ref_sd_all(&self, sd: &SD) {
+                    let _sched_guard = self.on_schedule_start("PreStartupRef");
+                
+                    #(
+                        {
+                            let _sys_guard = self.on_system_start("PreStartupRef", stringify!(#types), "pre_startup_ref_sd");
+                            self.#idents.pre_startup_ref_sd(sd);
+                        }
+                    )*
+                    // note: _sched_guard drops here → schedule span ends
+                }
+                
+                #[inline(always)]
+                fn pre_startup_mutref_sd_all(&self, sd: &mut SD) {
+                    let _sched_guard = self.on_schedule_start("PreStartupMutRef");
+                
+                    #(
+                        {
+                            let _sys_guard = self.on_system_start("PreStartupMutRef", stringify!(#types), "pre_startup_mutref_sd");
+                            self.#idents.pre_startup_mutref_sd(sd);
+                        }
+                    )*
+                }
+                
+                #[inline(always)]
                 fn startup_ref_sd_all(&self, sd: &SD) {
                     let _sched_guard = self.on_schedule_start("StartupRef");
                 
@@ -72,6 +97,31 @@ pub fn generate_collection(input: TokenStream) -> TokenStream {
                         {
                             let _sys_guard = self.on_system_start("StartupMutRef", stringify!(#types), "startup_mutref_sd");
                             self.#idents.startup_mutref_sd(sd);
+                        }
+                    )*
+                }
+                
+                #[inline(always)]
+                fn post_startup_ref_sd_all(&self, sd: &SD) {
+                    let _sched_guard = self.on_schedule_start("PostStartupRef");
+                
+                    #(
+                        {
+                            let _sys_guard = self.on_system_start("PostStartupRef", stringify!(#types), "post_startup_ref_sd");
+                            self.#idents.post_startup_ref_sd(sd);
+                        }
+                    )*
+                    // note: _sched_guard drops here → schedule span ends
+                }
+                
+                #[inline(always)]
+                fn post_startup_mutref_sd_all(&self, sd: &mut SD) {
+                    let _sched_guard = self.on_schedule_start("PostStartupMutRef");
+                
+                    #(
+                        {
+                            let _sys_guard = self.on_system_start("PostStartupMutRef", stringify!(#types), "post_startup_mutref_sd");
+                            self.#idents.post_startup_mutref_sd(sd);
                         }
                     )*
                 }

@@ -8,8 +8,12 @@ use crate::{app::ShouldExit, shared_data::SharedData};
 /// macro `generate_collection!`. Implementing it manually may, and will
 /// break the program!
 pub trait PluginCollection<SD: SharedData> {
+    fn pre_startup_ref_sd_all(&self, sd: &SD);
+    fn pre_startup_mutref_sd_all(&self, sd: &mut SD);
     fn startup_ref_sd_all(&self, sd: &SD);
     fn startup_mutref_sd_all(&self, sd: &mut SD);
+    fn post_startup_ref_sd_all(&self, sd: &SD);
+    fn post_startup_mutref_sd_all(&self, sd: &mut SD);
     fn pre_update_ref_sd_all(&self, sd: &SD);
     fn pre_update_mutref_sd_all(&self, sd: &mut SD);
     fn update_ref_sd_all(&self, sd: &SD);
