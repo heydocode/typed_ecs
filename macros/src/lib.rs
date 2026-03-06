@@ -27,7 +27,7 @@ pub fn generate_collection(input: TokenStream) -> TokenStream {
             });
             types_s.push(ident_str);
         } else {
-            panic!("generate_collection! only supports simple path types\n\nReceived tokens:\n{}", input_clone.to_string());
+            panic!("generate_collection! only supports simple path types\n\nReceived tokens:\n{}", input_clone);
         }
     }
 

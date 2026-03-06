@@ -2,11 +2,13 @@ use std::{thread::sleep, time::Duration};
 
 use typed_ecs::{app::{App, ShouldExit}, macros::generate_collection, plugin::Plugin, plugin_collection::PluginCollection, profile::setup_default_profiling, shared_data::SharedData  };
 
-struct Sleep20msPlugin;
+struct Sleep200msPlugin;
 
-impl <SD: SharedData> Plugin<SD> for Sleep20msPlugin {
+impl <SD: SharedData> Plugin<SD> for Sleep200msPlugin {
     fn update_ref_sd(&self, _sd: &SD) {
-        sleep(Duration::from_millis(20));
+        // Makes the plugin's system noticeable 
+        // in the produced profiling trace.
+        sleep(Duration::from_millis(200));
     }
 }
 
@@ -15,18 +17,6 @@ impl<SD: SharedData> Plugin<SD> for Plugin1 {
     fn startup_ref_sd(&self, _sd: &SD) {
         println!("Hello from plugin 1!");
     }
-}
-
-struct Plugin2;
-
-impl<SD: SharedData> Plugin<SD> for Plugin2 { 
-    /* Empty plugin, will it be optimized away? For sure! */ 
-    
-}
-
-impl Plugin2 {
-    #[allow(dead_code)]
-    const MARKER_STRING: &'static str = "I won't get to the final binary because of dead-code eliminations, but anyways...";
 }
 
 struct Plugin3;
@@ -48,9 +38,9 @@ impl<SD: SharedData + AdditionalRequirement> Plugin<SD> for Plugin3 {
     }
 }
 
-struct Plugin4;
+struct Plugin2;
 
-impl<SD: SharedData + AdditionalRequirement> Plugin<SD> for Plugin4 {
+impl<SD: SharedData + AdditionalRequirement> Plugin<SD> for Plugin2 {
     fn post_update_ref_sd(&self, sd: &SD) {
         let val = sd.get_val();
         
@@ -116,9 +106,8 @@ fn main() {
         CtrlCHandler,
         Plugin1, 
         Plugin2, 
-        Sleep20msPlugin,
+        Sleep200msPlugin,
         Plugin3,
-        Plugin4
     );
     // This is indeed a constant! A ZST, assembling multiple plugins into one scheduled runtime.
     const COLLECTION: GeneratedPluginCollection<SDimpl> = build_generated_collection::<SDimpl>();

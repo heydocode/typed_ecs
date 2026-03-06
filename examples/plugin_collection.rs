@@ -108,6 +108,8 @@ fn main() {
         Plugin4
     );
     // This is indeed a constant! A ZST, assembling multiple plugins into one scheduled runtime.
+    // Note that you can define it like `let collection: ...`, a constant is there only to show that
+    // it's a const-friendly value, but if you define it as a variable, make sure to still explicitely type it!
     const COLLECTION: GeneratedPluginCollection<SDimpl> = build_generated_collection::<SDimpl>();
     App::new(COLLECTION).run();
 }

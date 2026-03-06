@@ -11,6 +11,6 @@ pub fn setup_profiler(c: &mut Criterion) {
 }
 
 #[cfg(not(feature = "profile"))]
-pub fn setup_profiler(c: &mut Criterion) {}
+pub fn setup_profiler(_c: &mut Criterion) {}
 
 criterion_group!(setup, setup_profiler);

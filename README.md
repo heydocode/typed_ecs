@@ -34,7 +34,7 @@ Also, its ergonomicity and flexibility, despite the compile-time guarantees, wil
 
 Explore the examples to see `typed_ecs` in action:
 
-```shell
+```sh
 git clone https://github.com/heydocode/typed_ecs.git
 cd typed_ecs
 cargo run --example hello_world
@@ -91,6 +91,24 @@ Backends where some span data is lost and therefore unusable with `typed_ecs` (c
 
 - [`tracing-chrome`](https://docs.rs/tracing-chrome/latest/tracing_chrome/)
 - [`tracing-flame`](https://docs.rs/tracing-flame/latest/tracing_flame/)
+
+## Benchmarks
+
+`typed_ecs` implements [`criterion`](https://docs.rs/criterion/latest/criterion/) benchmarks. You can see them at [`benches`](benches)
+
+You can run these benchmarks with `cargo bench`. If you wish profiling the benches, you may
+want to enable a profiler via a dedicated feature (`profile-tracy` for Tracy or `profile-forest` for a TUI profiler).
+
+After the benches, you should see an html report at `target/criterion/report/index.html`.
+
+If you don't see it, try cleaning the building artefacts and re-benching:
+
+```sh
+cargo clean
+cargo bench
+```
+
+Repeat this a few times until you see the HTML report. (It may be just a personal issue that it doesn't get generated at the first time, but I prefer leaving it there in case it's not).
 
 ## Contributing
 

@@ -50,7 +50,7 @@ impl<SD: SharedData, PC: PluginCollection<SD>, Executor: ExecutorTrait> App<SD, 
     }
 
     pub fn run(self) {
-        Executor::run(self);
+        Executor::run(self)
     }
 }
 

@@ -27,7 +27,7 @@ impl CounterMemory for SDimpl {
     }
 }
 
-seq!(N in 1..=100 {
+seq!(N in 1..=500 {
     struct Plugin~N;
     impl <SD: SharedData + CounterMemory>Plugin<SD> for Plugin~N {
         fn update_mutref_sd(&self, sd: &mut SD) {
@@ -35,7 +35,7 @@ seq!(N in 1..=100 {
         }
         
         fn exit_check(&self, should_exit: &mut ShouldExit, sd: &SD) {
-            if sd.get_i() == 1_000_000 {
+            if sd.get_i() == 1_000 {
                 should_exit.request_exit();
             }
         }
@@ -43,14 +43,16 @@ seq!(N in 1..=100 {
 });
 
 pub fn run_fuzzed_plugins(c: &mut Criterion) {
-    let group = c.benchmark_group("100 increment plugins");
+    let mut group = c.benchmark_group("500 increment plugins");
     
-    seq!(N in 1..=100 {
+    seq!(N in 1..=500 {
         generate_collection!(#(Plugin~N,)*);
     });
     
     const COLLECTION: GeneratedPluginCollection<SDimpl> = build_generated_collection();
-    App::new(COLLECTION).run();
+    group.bench_function("fuzz_empty_plugins", move |b| {
+        b.iter(|| App::new(COLLECTION).run());
+    });
     group.finish();
 }
 

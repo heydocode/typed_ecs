@@ -31,7 +31,7 @@ struct ExitCounterPlugin;
 
 impl<SD: SharedData + CounterMemory>Plugin<SD> for ExitCounterPlugin {
     fn exit_check(&self, should_exit: &mut ShouldExit, sd: &SD) {
-        if sd.get_i() >= 10_000 {
+        if sd.get_i() >= 100 {
             should_exit.request_exit();
         }
     }
@@ -41,22 +41,22 @@ impl<SD: SharedData + CounterMemory>Plugin<SD> for ExitCounterPlugin {
     }
 }
 
-seq!(N in 1..=100 {
+seq!(N in 1..=500 {
     struct Plugin~N;
     impl <SD: SharedData>Plugin<SD> for Plugin~N {}
 });
 
 pub fn run_fuzzed_plugins(c: &mut Criterion) {
-    let mut group = c.benchmark_group("100 empty plugins");
+    let mut group = c.benchmark_group("500 empty plugins");
     
-    seq!(N in 1..=100 {
+    seq!(N in 1..=500 {
         generate_collection!(#(Plugin~N,)* ExitCounterPlugin);
     });
     
     const COLLECTION: GeneratedPluginCollection<SDimpl> = build_generated_collection();
     
-    group.bench_function("fuzz_empty_plugins", |b| {
-        App::new(COLLECTION).run();
+    group.bench_function("fuzz_empty_plugins", move |b| {
+        b.iter(|| App::new(COLLECTION).run());
     });
     
     group.finish();
