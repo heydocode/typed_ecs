@@ -4,7 +4,9 @@ use ::quote::quote;
 use ::syn::{punctuated::Punctuated, *};
 use quote::format_ident;
 
-
+/// Please see the [`plugin_collection`](examples/plugin_collection.rs) for more details on the usage of this macro.
+/// For simplicity reasons, this macro does not accept any generic plugins. If you need to have them implemented,
+/// please open an issue on GitHub (https://github.com/heydocode/typed_ecs/issues)
 #[proc_macro]
 pub fn generate_collection(input: TokenStream) -> TokenStream {
     let input_clone = input.clone();
