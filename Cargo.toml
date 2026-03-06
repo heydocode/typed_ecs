@@ -16,6 +16,7 @@ publish = true
 members = ["macros"]
 
 [features]
+default = ["profile-tracy"]
 profile = [
     "dep:tracing",
 ]
@@ -33,7 +34,7 @@ profile-forest = [
 ]
 
 [dependencies]
-# public re-export
+# public macro re-export
 macros = { path = "macros" }
 # 3 profiling crates; not included by default
 tracing = { version = "0.1", optional = true }
@@ -41,7 +42,15 @@ tracing-subscriber = { version = "0.3.22", optional = true }
 tracing-tracy = { version = "0.11.4", optional = true, features = ["flush-on-exit"] }
 tracing-forest = { version = "0.3.1", optional = true, features = ["full"] }
 
+[dev-dependencies]
+seq-macro = "0.3.6"
+criterion = { version = "0.8.2", features = ["html_reports"] }
+
 [[example]]
 name = "profile"
 required-features = ["profile"]
 path = "examples/profile.rs"
+
+[[bench]]
+name = "bench_main"
+harness = false

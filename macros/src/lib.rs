@@ -7,6 +7,7 @@ use quote::format_ident;
 
 #[proc_macro]
 pub fn generate_collection(input: TokenStream) -> TokenStream {
+    let input_clone = input.clone();
     let types = parse_macro_input!(
         input with Punctuated::<Type, Token![,]>::parse_terminated
     );
@@ -26,7 +27,7 @@ pub fn generate_collection(input: TokenStream) -> TokenStream {
             });
             types_s.push(ident_str);
         } else {
-            panic!("assemble_collection! only supports simple path types");
+            panic!("generate_collection! only supports simple path types\n\nReceived tokens:\n{}", input_clone.to_string());
         }
     }
 
