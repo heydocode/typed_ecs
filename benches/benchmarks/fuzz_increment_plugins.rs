@@ -1,7 +1,12 @@
 use criterion::{Criterion, criterion_group};
 use macros::generate_collection;
 use seq_macro::seq;
-use typed_ecs::{app::{App, ShouldExit}, plugin::Plugin, plugin_collection::PluginCollection, shared_data::{SharedData}};
+use typed_ecs::{
+    app::{App, ShouldExit},
+    plugin::Plugin,
+    plugin_collection::PluginCollection,
+    shared_data::SharedData,
+};
 
 trait CounterMemory {
     fn get_i(&self) -> u128;
@@ -9,7 +14,7 @@ trait CounterMemory {
 }
 
 struct SDimpl {
-    i: u128
+    i: u128,
 }
 
 impl SharedData for SDimpl {
@@ -33,7 +38,7 @@ seq!(N in 1..=500 {
         fn update_mutref_sd(&self, sd: &mut SD) {
             sd.increment_i();
         }
-        
+
         fn exit_check(&self, should_exit: &mut ShouldExit, sd: &SD) {
             if sd.get_i() == 1_000 {
                 should_exit.request_exit();
@@ -44,11 +49,11 @@ seq!(N in 1..=500 {
 
 pub fn run_fuzzed_plugins(c: &mut Criterion) {
     let mut group = c.benchmark_group("500 increment plugins");
-    
+
     seq!(N in 1..=500 {
         generate_collection!(#(Plugin~N,)*);
     });
-    
+
     const COLLECTION: GeneratedPluginCollection<SDimpl> = build_generated_collection();
     group.bench_function("fuzz_empty_plugins", move |b| {
         b.iter(|| App::new(COLLECTION).run());

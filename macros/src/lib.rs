@@ -27,7 +27,10 @@ pub fn generate_collection(input: TokenStream) -> TokenStream {
             });
             types_s.push(ident_str);
         } else {
-            panic!("generate_collection! only supports simple path types\n\nReceived tokens:\n{}", input_clone);
+            panic!(
+                "generate_collection! only supports simple path types\n\nReceived tokens:\n{}",
+                input_clone
+            );
         }
     }
 
@@ -37,24 +40,24 @@ pub fn generate_collection(input: TokenStream) -> TokenStream {
 
     let expanded = quote! {
             use core::marker::PhantomData;
-        
+
             struct GeneratedPluginCollection<SD> {
                 #(#quote_fields,)*
                 _marker: PhantomData<SD>
             }
 
             impl <SD>PluginCollection<SD> for GeneratedPluginCollection<SD>
-            where SD: SharedData, 
+            where SD: SharedData,
             // Even if this appears to do nothing as the hard check is done
             // in build_generated_collection, never remove it: it allows
             // lazy trait evaluation.
             #( #types: Plugin<SD>, )*
-            
+
             {
                 #[inline(always)]
                 fn pre_startup_ref_sd_all(&self, sd: &SD) {
                     let _sched_guard = self.on_schedule_start("PreStartupRef");
-                
+
                     #(
                         {
                             let _sys_guard = self.on_system_start("PreStartupRef", stringify!(#types), "pre_startup_ref_sd");
@@ -63,11 +66,11 @@ pub fn generate_collection(input: TokenStream) -> TokenStream {
                     )*
                     // note: _sched_guard drops here → schedule span ends
                 }
-                
+
                 #[inline(always)]
                 fn pre_startup_mutref_sd_all(&self, sd: &mut SD) {
                     let _sched_guard = self.on_schedule_start("PreStartupMutRef");
-                
+
                     #(
                         {
                             let _sys_guard = self.on_system_start("PreStartupMutRef", stringify!(#types), "pre_startup_mutref_sd");
@@ -75,11 +78,11 @@ pub fn generate_collection(input: TokenStream) -> TokenStream {
                         }
                     )*
                 }
-                
+
                 #[inline(always)]
                 fn startup_ref_sd_all(&self, sd: &SD) {
                     let _sched_guard = self.on_schedule_start("StartupRef");
-                
+
                     #(
                         {
                             let _sys_guard = self.on_system_start("StartupRef", stringify!(#types), "startup_ref_sd");
@@ -88,11 +91,11 @@ pub fn generate_collection(input: TokenStream) -> TokenStream {
                     )*
                     // note: _sched_guard drops here → schedule span ends
                 }
-                
+
                 #[inline(always)]
                 fn startup_mutref_sd_all(&self, sd: &mut SD) {
                     let _sched_guard = self.on_schedule_start("StartupMutRef");
-                
+
                     #(
                         {
                             let _sys_guard = self.on_system_start("StartupMutRef", stringify!(#types), "startup_mutref_sd");
@@ -100,11 +103,11 @@ pub fn generate_collection(input: TokenStream) -> TokenStream {
                         }
                     )*
                 }
-                
+
                 #[inline(always)]
                 fn post_startup_ref_sd_all(&self, sd: &SD) {
                     let _sched_guard = self.on_schedule_start("PostStartupRef");
-                
+
                     #(
                         {
                             let _sys_guard = self.on_system_start("PostStartupRef", stringify!(#types), "post_startup_ref_sd");
@@ -113,11 +116,11 @@ pub fn generate_collection(input: TokenStream) -> TokenStream {
                     )*
                     // note: _sched_guard drops here → schedule span ends
                 }
-                
+
                 #[inline(always)]
                 fn post_startup_mutref_sd_all(&self, sd: &mut SD) {
                     let _sched_guard = self.on_schedule_start("PostStartupMutRef");
-                
+
                     #(
                         {
                             let _sys_guard = self.on_system_start("PostStartupMutRef", stringify!(#types), "post_startup_mutref_sd");
@@ -125,11 +128,11 @@ pub fn generate_collection(input: TokenStream) -> TokenStream {
                         }
                     )*
                 }
-                
+
                 #[inline(always)]
                 fn pre_update_ref_sd_all(&self, sd: &SD) {
                     let _sched_guard = self.on_schedule_start("PreUpdateRef");
-                
+
                     #(
                         {
                             let _sys_guard = self.on_system_start("PreUpdateRef", stringify!(#types), "pre_update_ref_sd");
@@ -137,11 +140,11 @@ pub fn generate_collection(input: TokenStream) -> TokenStream {
                         }
                     )*
                 }
-                
+
                 #[inline(always)]
                 fn pre_update_mutref_sd_all(&self, sd: &mut SD) {
                     let _sched_guard = self.on_schedule_start("PreUpdateMutRef");
-                
+
                     #(
                         {
                             let _sys_guard = self.on_system_start("PreUpdateMutRef", stringify!(#types), "pre_update_mutref_sd");
@@ -149,11 +152,11 @@ pub fn generate_collection(input: TokenStream) -> TokenStream {
                         }
                     )*
                 }
-                
+
                 #[inline(always)]
                 fn update_ref_sd_all(&self, sd: &SD) {
                     let _sched_guard = self.on_schedule_start("UpdateRef");
-                
+
                     #(
                         {
                             let _sys_guard = self.on_system_start("UpdateRef", stringify!(#types), "update_ref_sd");
@@ -161,11 +164,11 @@ pub fn generate_collection(input: TokenStream) -> TokenStream {
                         }
                     )*
                 }
-                
+
                 #[inline(always)]
                 fn update_mutref_sd_all(&self, sd: &mut SD) {
                     let _sched_guard = self.on_schedule_start("UpdateMutRef");
-                
+
                     #(
                         {
                             let _sys_guard = self.on_system_start("UpdateMutRef", stringify!(#types), "update_mutref_sd");
@@ -173,11 +176,11 @@ pub fn generate_collection(input: TokenStream) -> TokenStream {
                         }
                     )*
                 }
-                
+
                 #[inline(always)]
                 fn post_update_ref_sd_all(&self, sd: &SD) {
                     let _sched_guard = self.on_schedule_start("PostUpdateRef");
-                
+
                     #(
                         {
                             let _sys_guard = self.on_system_start("PostUpdateRef", stringify!(#types), "post_update_ref_sd");
@@ -185,11 +188,11 @@ pub fn generate_collection(input: TokenStream) -> TokenStream {
                         }
                     )*
                 }
-                
+
                 #[inline(always)]
                 fn post_update_mutref_sd_all(&self, sd: &mut SD) {
                     let _sched_guard = self.on_schedule_start("PostUpdateMutRef");
-                
+
                     #(
                         {
                             let _sys_guard = self.on_system_start("PostUpdateMutRef", stringify!(#types), "post_update_mutref_sd");
@@ -197,11 +200,11 @@ pub fn generate_collection(input: TokenStream) -> TokenStream {
                         }
                     )*
                 }
-                
+
                 #[inline(always)]
                 fn exit_check_all(&self, should_exit: &mut ShouldExit, sd: &SD) {
                     let _sched_guard = self.on_schedule_start("ExitCheck");
-                
+
                     #(
                         {
                             let _sys_guard = self.on_system_start("ExitCheck", stringify!(#types), "exit_check");
@@ -209,11 +212,11 @@ pub fn generate_collection(input: TokenStream) -> TokenStream {
                         }
                     )*
                 }
-                
+
                 #[inline(always)]
                 fn on_exit_all(&self, sd: &SD) {
                     let _sched_guard = self.on_schedule_start("OnExit");
-                
+
                     #(
                         {
                             let _sys_guard = self.on_system_start("OnExit", stringify!(#types), "on_exit");
@@ -224,8 +227,8 @@ pub fn generate_collection(input: TokenStream) -> TokenStream {
             }
 
             const fn build_generated_collection<SD>()
-            -> GeneratedPluginCollection<SD> 
-            where 
+            -> GeneratedPluginCollection<SD>
+            where
             SD: SharedData,
                 #( #types: Plugin<SD>, )*
             {

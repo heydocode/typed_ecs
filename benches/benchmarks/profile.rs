@@ -1,7 +1,7 @@
 use criterion::Criterion;
+use criterion::criterion_group;
 #[cfg(feature = "profile")]
 use typed_ecs::profile::setup_default_profiling;
-use criterion::criterion_group;
 
 #[cfg(feature = "profile")]
 pub fn setup_profiler(c: &mut Criterion) {

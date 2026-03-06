@@ -30,12 +30,12 @@ pub trait PluginCollection<SD: SharedData> {
     // BEHAVIOR, THAT'S WHY THE TRAIT MUST BE IMPLEMENTED BY MACRO!
     // ------------------------------------------------------------
 
-    /// Hook, called individually once per schedule (e.g. on the 
+    /// Hook, called individually once per schedule (e.g. on the
     /// beginning of Startup, Update, ...).
-    /// 
+    ///
     /// Used for:
     /// - profiling: `profile` feature
-    /// 
+    ///
     /// When all of the features listed above are disabled, the
     /// function gets optimized away, as it returns a ZST.
     #[inline(always)]
@@ -53,10 +53,10 @@ pub trait PluginCollection<SD: SharedData> {
     }
 
     /// Hook, called individually once per plugin system call.
-    /// 
+    ///
     /// Used for:
     /// - profiling: `profile` feature
-    /// 
+    ///
     /// When all of the features listed above are disabled, the
     /// function gets optimized away, as it returns a ZST.
     #[inline(always)]

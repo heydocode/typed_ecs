@@ -1,4 +1,10 @@
-use typed_ecs::{app::{App, ShouldExit}, macros::generate_collection, plugin::Plugin, plugin_collection::PluginCollection, shared_data::SharedData  };
+use typed_ecs::{
+    app::{App, ShouldExit},
+    macros::generate_collection,
+    plugin::Plugin,
+    plugin_collection::PluginCollection,
+    shared_data::SharedData,
+};
 
 struct Plugin1;
 impl<SD: SharedData> Plugin<SD> for Plugin1 {
@@ -9,14 +15,14 @@ impl<SD: SharedData> Plugin<SD> for Plugin1 {
 
 struct Plugin2;
 
-impl<SD: SharedData> Plugin<SD> for Plugin2 { 
-    /* Empty plugin, will it be optimized away? For sure! */ 
-    
+impl<SD: SharedData> Plugin<SD> for Plugin2 {
+    /* Empty plugin, will it be optimized away? For sure! */
 }
 
 impl Plugin2 {
     #[allow(dead_code)]
-    const MARKER_STRING: &'static str = "I won't get to the final binary because of dead-code eliminations, but anyways...";
+    const MARKER_STRING: &'static str =
+        "I won't get to the final binary because of dead-code eliminations, but anyways...";
 }
 
 struct Plugin3;
@@ -24,14 +30,13 @@ impl<SD: SharedData + AdditionalRequirement> Plugin<SD> for Plugin3 {
     fn startup_ref_sd(&self, sd: &SD) {
         println!("Initial val value: {}", sd.get_val());
     }
-    
+
     fn pre_update_mutref_sd(&self, sd: &mut SD) {
         let val = sd.get_val();
-        
+
         if !(val >= u8::MAX - 1) {
             sd.set_val(val + 1);
-        }
-        else {
+        } else {
             sd.set_val(0);
             sd.incr_i();
         }
@@ -43,14 +48,14 @@ struct Plugin4;
 impl<SD: SharedData + AdditionalRequirement> Plugin<SD> for Plugin4 {
     fn post_update_ref_sd(&self, sd: &SD) {
         let val = sd.get_val();
-        
+
         println!("Current val: {}", val);
     }
-    
+
     fn on_exit(&self, sd: &SD) {
         let val = sd.get_val();
         let i = sd.get_i();
-        
+
         println!("Current val: {}", val);
         println!("Iterations number: {}", i);
     }
@@ -100,13 +105,7 @@ impl AdditionalRequirement for SDimpl {
 }
 
 fn main() {
-    generate_collection!(
-        CtrlCHandler,
-        Plugin1, 
-        Plugin2, 
-        Plugin3,
-        Plugin4
-    );
+    generate_collection!(CtrlCHandler, Plugin1, Plugin2, Plugin3, Plugin4);
     // This is indeed a constant! A ZST, assembling multiple plugins into one scheduled runtime.
     // Note that you can define it like `let collection: ...`, a constant is there only to show that
     // it's a const-friendly value, but if you define it as a variable, make sure to still explicitely type it!

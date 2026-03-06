@@ -34,11 +34,9 @@ impl ExecutorTrait for CustomExecutor {
             if iter == 1 {
                 println!("Beginning iter {}...", iter);
                 println!("Here, each `.` is a new iteration:");
-            }
-            else if iter != 100 {
+            } else if iter != 100 {
                 print!(".");
-            }
-            else {
+            } else {
                 println!("\nBeginning iter {}...", iter);
             }
             plugin_collection.pre_update_ref_sd_all(&sd);
