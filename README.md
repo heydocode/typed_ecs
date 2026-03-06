@@ -6,7 +6,7 @@
 
 A `no_std` and `no-alloc` tiny ECS written in Rust, which provides strong compile-time guarantees.
 
-This project is in active development but **is ready to be used**, just note that its API will break often until v0.1.x releases.
+This project is in active development but technically is ready to be used, just note that its API will break often until v0.1.x releases.
 
 Also, its ergonomicity and flexibility, despite the compile-time guarantees, will improve over time.
 
