@@ -18,7 +18,7 @@ pub trait Plugin<SD: SharedData> {
     #[inline(always)]
     fn post_update_mutref_sd(&self, _sd: &mut SD) {}
     #[inline(always)]
-    fn update_exit_status_with_sd(&self, _should_exit: &mut ShouldExit, _sd: &SD) {}
+    fn exit_check(&self, _should_exit: &mut ShouldExit, _sd: &SD) {}
     #[inline(always)]
     fn on_exit(&self, _sd: &SD) {}
 }

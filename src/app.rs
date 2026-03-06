@@ -1,9 +1,6 @@
-use core::marker::PhantomData;
-
 use crate::{
-    plugin::Plugin,
     plugin_collection::PluginCollection,
-    shared_data::{PhantomSharedData, SharedData},
+    shared_data::SharedData
 };
 
 /// ECS holder field, that is distributed for all plugins
@@ -51,7 +48,7 @@ impl<SD: SharedData, PC: PluginCollection<SD>> App<SD, PC> {
             plugin_collection.update_mutref_sd_all(&mut sd);
             plugin_collection.post_update_ref_sd_all(&sd);
             plugin_collection.post_update_mutref_sd_all(&mut sd);
-            plugin_collection.update_exit_status_with_sd_all(&mut should_exit, &sd);
+            plugin_collection.exit_check_all(&mut should_exit, &sd);
         }
         plugin_collection.on_exit_all(&sd);
     }

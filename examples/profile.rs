@@ -1,4 +1,14 @@
-use typed_ecs::{app::{App, ShouldExit}, macros::generate_collection, plugin::Plugin, plugin_collection::PluginCollection, shared_data::SharedData  };
+use std::{thread::sleep, time::Duration};
+
+use typed_ecs::{app::{App, ShouldExit}, macros::generate_collection, plugin::Plugin, plugin_collection::PluginCollection, profile::setup_default_profiling, shared_data::SharedData  };
+
+struct Sleep20msPlugin;
+
+impl <SD: SharedData> Plugin<SD> for Sleep20msPlugin {
+    fn update_ref_sd(&self, _sd: &SD) {
+        sleep(Duration::from_millis(20));
+    }
+}
 
 struct Plugin1;
 impl<SD: SharedData> Plugin<SD> for Plugin1 {
@@ -100,10 +110,13 @@ impl AdditionalRequirement for SDimpl {
 }
 
 fn main() {
+    setup_default_profiling();
+    
     generate_collection!(
         CtrlCHandler,
         Plugin1, 
         Plugin2, 
+        Sleep20msPlugin,
         Plugin3,
         Plugin4
     );

@@ -8,7 +8,7 @@ impl <SD: SharedData>Plugin<SD> for HelloWorldPlugin {
     }
     // This system runs in the end of each cycle, 
     // so after startup, and after all updates.
-    fn update_exit_status_with_sd(&self, should_exit: &mut ShouldExit, _sd: &SD) {
+    fn exit_check(&self, should_exit: &mut ShouldExit, _sd: &SD) {
         // Requests the program to exit.
         // This request is guaranteed to be heard, but not guaranteed
         // to exit immediately (because it needs to run on_exit hooks).

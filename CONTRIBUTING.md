@@ -52,7 +52,7 @@ chore(issue templates): add initial issue templates
 Explain:
 
 - **What** you changed
-- **Why** you changed it (if not obvious)
+- **Why** you changed it
 - **Impact** or important details
 
 Use bullet points for clarity:
