@@ -2,14 +2,31 @@
 name = "typed_ecs"
 version = "0.0.2"
 edition = "2024"
-description = "A no_std, no_alloc Entity Component System with compile-time guarantees"
+description = "A no_std, no_alloc ECS with compile-time guarantees, and BLAZING PERFORMANCE!"
 authors = ["heydocode"]
 license = "MIT"
 repository = "https://github.com/heydocode/typed_ecs"
 documentation = "https://docs.rs/typed_ecs"
 readme = "README.md"
-keywords = ["ecs", "no-std", "no-alloc", "game", "embedded"]
-categories = ["no-std", "embedded", "game-development"]
+keywords = ["ecs", "no-std", "no-alloc", "typed", "embedded", "static", "compile-time"]
+# I think I need help categorizing this crate... Please open an issue if you will doing so...
+# The thing is that this crate is very suitable for literally everything where developers are
+# used to Rust's features (traits, generics, ...).
+# 
+# - memory management because that's up to the plugin's developer to design the memory space 
+# its plugin will use (in a SharedData supertrait constraint)
+# 
+# - devtools because this allows to organize plugins possibly across various codebases into one 
+# App, with aggressive optimizations and extreme cache locality (= performance), and there are
+# also built-in profilers for optimizing & analysis purposes.
+# 
+# - game-engines because this project has so much potential in this area, 
+# btw I plan creating a game engine using this ecs
+# 
+# - wasm because it's alloc free, meaning that the final size will be way lower, and it's no-std, 
+# which is also better for wasm, because it means less size too and less ambiguity (wasm doesn't 
+# really fully implements std)
+categories = ["no-std", "embedded", "memory-management", "development-tools", "game-engines", "wasm"]
 publish = true
 
 [workspace]
