@@ -77,6 +77,7 @@ Tracing crate allows to easily profile Rust applications, a process that helps f
 ### Note on profiled "dead" systems execution time
 
 When you'll profile your app that uses `typed_ecs`, you'll notice something: some "dead" (= empty) systems seem to execute, and seem to not be fully optimized away, but that's the case! When you see a system running for 200-1000ns, depending on the profiler and your hardware, that's simply the begin recording function overhead. In fact, even when the system is completely optimized away, the recording function (in the case of systems: inside the `on_system_start` hook) takes time to create a span, then send it before dropping it, and finally execute the `Drop` implementation of the span, which purpose is to stop the timer. This process takes time and therefore it seems that systems that should have been optimized away are still there (which is, again, not the case). And if you wonder why if it's optimized away, you see the current schedule, system name, and even its plugin displayed, that's the work of the proc-macro `generate_collection`!
+EDIT: It may more be a thing of optimization - make sure using O3 optimizations and higher. 
 
 Obviously, this kind of overhead is completely vanishing when the `profile` feature is disabled.
 
