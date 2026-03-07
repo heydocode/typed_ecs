@@ -30,7 +30,7 @@ categories = ["no-std", "embedded", "memory-management", "development-tools", "g
 publish = true
 
 [workspace]
-members = ["macros"]
+members = ["typed_ecs_macros"]
 
 [features]
 profile = ["dep:tracing"]
@@ -41,7 +41,7 @@ profile-forest = ["profile", "dep:tracing-subscriber", "dep:tracing-forest"]
 
 [dependencies]
 # public macro re-export
-macros = { path = "macros" }
+typed_ecs_macros = { version = "0.0.2", path = "typed_ecs_macros" }
 # 3 profiling crates; not included by default
 tracing = { version = "0.1", optional = true }
 tracing-subscriber = { version = "0.3.22", optional = true }

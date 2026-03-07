@@ -16,7 +16,7 @@ Also, its ergonomicity and flexibility, despite the compile-time guarantees, wil
 
 - lets you wire plugins together at **compile time**, without runtime overhead
 - enforces plugin collection / plugin / shared-data compatibility via Rust trait bounds (no runtime checking)
-- is written for `no_std` and `no_alloc` environments, but still optimized for very powerful machines (profiling built-in, multithreading and async coming!)
+- is written for `no_std` and `no_alloc` environments, but still optimized for very powerful machines (profiling built-in, multithreading and async coming! (TODO!))
 - contains no runtime (only a scheduler): every plugin gets optimized by the compiler to the point that the produced assembly is comparable to a hand-written loop (see the godbolt section below)
 - has no dependencies! (Profiling dependencies are not taken into account, because these are enabled on feature, and are not advised in releases)
 
