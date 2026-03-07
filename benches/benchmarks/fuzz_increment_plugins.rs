@@ -1,5 +1,5 @@
 use criterion::{Criterion, criterion_group};
-use macros::generate_collection;
+use typed_ecs::macros::generate_collection;
 use seq_macro::seq;
 use typed_ecs::{
     app::{App, ShouldExit},

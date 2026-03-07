@@ -1,4 +1,4 @@
-use macros::generate_collection;
+use typed_ecs::macros::generate_collection;
 use typed_ecs::{
     app::ShouldExit,
     app::{App, ExecutorTrait},
