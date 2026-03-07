@@ -130,3 +130,14 @@ For larger contributions or significant changes (like creating a website), we re
 3. Getting alignment on design and implementation details
 
 This ensures your efforts align with project goals and standards. For smaller fixes like documentation tweaks or test additions, feel free to submit a PR directly.
+
+## License
+
+Licensed under either of
+
+- Apache License, Version 2.0
+  ([LICENSE-APACHE](LICENSE-APACHE) or http://www.apache.org/licenses/LICENSE-2.0)
+- MIT license
+  ([LICENSE-MIT](LICENSE-MIT) or http://opensource.org/licenses/MIT)
+
+at your option.
