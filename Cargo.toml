@@ -22,11 +22,7 @@ keywords = ["ecs", "no-std", "no-alloc", "typed", "embedded"]
 # 
 # - game-engines because this project has so much potential in this area, 
 # btw I plan creating a game engine using this ecs
-# 
-# - wasm because it's alloc free, meaning that the final size will be way lower, and it's no-std, 
-# which is also better for wasm, because it means less size too and less ambiguity (wasm doesn't 
-# really fully implements std)
-categories = ["no-std", "embedded", "memory-management", "development-tools", "game-engines", "wasm"]
+categories = ["no-std", "embedded", "memory-management", "development-tools", "game-engines"]
 publish = true
 
 [workspace]
