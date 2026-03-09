@@ -56,7 +56,7 @@ then how append the example code in it, using [`cargo-expand`](https://crates.io
 
 Alternatively, you can go [to this link](https://godbolt.org/z/1KeTjExh3) (Godbolt) in order to view these optimizations without pasting anything. Though, note that this link is updated by hand, and may be outdated!
 
-In the future, a special util will be developed, in order to automate the process of creating a mono, godbolt ready file, for assembly analysis purposes.
+In the future, a special util will be developed, in order to automate the process of creating a single godbolt-ready file, for assembly analysis purposes.
 
 ## Profiling with [`tracing`](https://github.com/tokio-rs/tracing)
 
