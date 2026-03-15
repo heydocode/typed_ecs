@@ -39,19 +39,22 @@ pub fn generate_collection(input: TokenStream) -> TokenStream {
     let types: Vec<syn::Ident> = types_s.iter().map(|s| format_ident!("{}", s)).collect();
 
     let expanded = quote! {
-            use core::marker::PhantomData;
+            use core::marker::PhantomData as PhantomDataUsedByTypedEcsMacro;
+            use typed_ecs::plugin_collection::PluginCollection as PluginCollectionUsedByTypedEcsMacro;
+            use typed_ecs::shared_data::SharedData as SharedDataUsedByTypedEcsMacro;
+            use typed_ecs::plugin::Plugin as PluginUsedByTypedEcsMacro;
 
-            struct GeneratedPluginCollection<SD> {
+            pub struct GeneratedPluginCollection<SD> {
                 #(#quote_fields,)*
-                _marker: PhantomData<SD>
+                _marker: PhantomDataUsedByTypedEcsMacro<SD>
             }
 
-            impl <SD>PluginCollection<SD> for GeneratedPluginCollection<SD>
-            where SD: SharedData,
+            impl <SD>PluginCollectionUsedByTypedEcsMacro<SD> for GeneratedPluginCollection<SD>
+            where SD: SharedDataUsedByTypedEcsMacro,
             // Even if this appears to do nothing as the hard check is done
             // in build_generated_collection, never remove it: it allows
             // lazy trait evaluation.
-            #( #types: Plugin<SD>, )*
+            #( #types: PluginUsedByTypedEcsMacro<SD>, )*
 
             {
                 #[inline(always)]
@@ -226,15 +229,15 @@ pub fn generate_collection(input: TokenStream) -> TokenStream {
                 }
             }
 
-            const fn build_generated_collection<SD>()
+            pub const fn build_generated_collection<SD>()
             -> GeneratedPluginCollection<SD>
             where
-            SD: SharedData,
-                #( #types: Plugin<SD>, )*
+            SD: SharedDataUsedByTypedEcsMacro,
+                #( #types: PluginUsedByTypedEcsMacro<SD>, )*
             {
                 GeneratedPluginCollection::<SD> {
                     #(#quote_fields,)*
-                    _marker: PhantomData
+                    _marker: PhantomDataUsedByTypedEcsMacro
                 }
             }
     };

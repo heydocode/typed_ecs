@@ -2,7 +2,7 @@ use typed_ecs::{
     app::{App, ShouldExit},
     macros::generate_collection,
     plugin::Plugin,
-    plugin_collection::PluginCollection,
+    // plugin_collection::PluginCollection,
     shared_data::{PhantomSharedData, SharedData},
 };
 

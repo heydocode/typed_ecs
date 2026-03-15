@@ -6,6 +6,7 @@ use typed_ecs::{
     plugin_collection::PluginCollection,
     shared_data::{PhantomSharedData, SharedData},
 };
+use core::marker::PhantomData;
 
 struct EmptyPlugin;
 

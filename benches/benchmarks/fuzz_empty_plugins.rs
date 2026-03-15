@@ -4,7 +4,6 @@ use seq_macro::seq;
 use typed_ecs::{
     app::{App, ShouldExit},
     plugin::Plugin,
-    plugin_collection::PluginCollection,
     shared_data::SharedData,
 };
 
