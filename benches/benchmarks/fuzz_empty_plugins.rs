@@ -45,15 +45,15 @@ impl<SD: SharedData + CounterMemory> Plugin<SD> for ExitCounterPlugin {
     }
 }
 
-seq!(N in 1..=500 {
+seq!(N in 1..=100 {
     struct Plugin~N;
     impl <SD: SharedData>Plugin<SD> for Plugin~N {}
 });
 
 pub fn run_fuzzed_plugins(c: &mut Criterion) {
-    let mut group = c.benchmark_group("500 empty plugins");
+    let mut group = c.benchmark_group("100 empty plugins");
 
-    seq!(N in 1..=500 {
+    seq!(N in 1..=100 {
         generate_collection!(#(Plugin~N,)* ExitCounterPlugin);
     });
 

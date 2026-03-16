@@ -1,3 +1,5 @@
+#![allow(async_fn_in_trait)]
+
 use crate::{app::ShouldExit, shared_data::SharedData};
 
 /// The generated PluginCollection implements this trait. The SharedData
@@ -8,6 +10,21 @@ use crate::{app::ShouldExit, shared_data::SharedData};
 /// macro `generate_collection!`. Implementing it manually may, and will
 /// break the program!
 pub trait PluginCollection<SD: SharedData> {
+    async fn async_pre_startup_ref_sd_all(&self, sd: &SD);
+    async fn async_pre_startup_mutref_sd_all(&self, sd: &mut SD);
+    async fn async_startup_ref_sd_all(&self, sd: &SD);
+    async fn async_startup_mutref_sd_all(&self, sd: &mut SD);
+    async fn async_post_startup_ref_sd_all(&self, sd: &SD);
+    async fn async_post_startup_mutref_sd_all(&self, sd: &mut SD);
+    async fn async_pre_update_ref_sd_all(&self, sd: &SD);
+    async fn async_pre_update_mutref_sd_all(&self, sd: &mut SD);
+    async fn async_update_ref_sd_all(&self, sd: &SD);
+    async fn async_update_mutref_sd_all(&self, sd: &mut SD);
+    async fn async_post_update_ref_sd_all(&self, sd: &SD);
+    async fn async_post_update_mutref_sd_all(&self, sd: &mut SD);
+    async fn async_exit_check_all(&self, should_exit: &mut ShouldExit, sd: &SD);
+    async fn async_on_exit_all(&self, sd: &SD);
+    
     fn pre_startup_ref_sd_all(&self, sd: &SD);
     fn pre_startup_mutref_sd_all(&self, sd: &mut SD);
     fn startup_ref_sd_all(&self, sd: &SD);
@@ -20,7 +37,7 @@ pub trait PluginCollection<SD: SharedData> {
     fn update_mutref_sd_all(&self, sd: &mut SD);
     fn post_update_ref_sd_all(&self, sd: &SD);
     fn post_update_mutref_sd_all(&self, sd: &mut SD);
-    fn exit_check_all(&self, _should_exit: &mut ShouldExit, sd: &SD);
+    fn exit_check_all(&self, should_exit: &mut ShouldExit, sd: &SD);
     fn on_exit_all(&self, sd: &SD);
 
     // ------------------------------------------------------------

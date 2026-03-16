@@ -1,5 +1,7 @@
 use core::marker::PhantomData;
 
+use crate::executor::{ExecutorTrait, DefaultExecutor};
+
 use crate::{plugin_collection::PluginCollection, shared_data::SharedData};
 
 /// ECS holder field, that is distributed for all plugins
@@ -51,38 +53,6 @@ impl<SD: SharedData, PC: PluginCollection<SD>, Executor: ExecutorTrait> App<SD, 
     }
 
     pub fn run(self) {
-        Executor::run(self)
+        Executor::init().run(self);
     }
-}
-
-pub struct DefaultExecutor;
-
-impl ExecutorTrait for DefaultExecutor {
-    fn run<SD: SharedData, PC: PluginCollection<SD>, Executor: ExecutorTrait>(
-        app: App<SD, PC, Executor>,
-    ) {
-        let plugin_collection = &app.plugin_collection;
-        let mut sd = app.shared_data;
-        let mut should_exit = app.should_exit;
-
-        plugin_collection.startup_ref_sd_all(&sd);
-        plugin_collection.startup_mutref_sd_all(&mut sd);
-
-        while !should_exit.get_val() {
-            plugin_collection.pre_update_ref_sd_all(&sd);
-            plugin_collection.pre_update_mutref_sd_all(&mut sd);
-            plugin_collection.update_ref_sd_all(&sd);
-            plugin_collection.update_mutref_sd_all(&mut sd);
-            plugin_collection.post_update_ref_sd_all(&sd);
-            plugin_collection.post_update_mutref_sd_all(&mut sd);
-            plugin_collection.exit_check_all(&mut should_exit, &sd);
-        }
-        plugin_collection.on_exit_all(&sd);
-    }
-}
-
-pub trait ExecutorTrait {
-    fn run<SD: SharedData, PC: PluginCollection<SD>, Executor: ExecutorTrait>(
-        app: App<SD, PC, Executor>,
-    );
 }

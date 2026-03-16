@@ -31,7 +31,7 @@ impl CounterMemory for SDimpl {
     }
 }
 
-seq!(N in 1..=500 {
+seq!(N in 1..=100 {
     struct Plugin~N;
     impl <SD: SharedData + CounterMemory>Plugin<SD> for Plugin~N {
         fn update_mutref_sd(&self, sd: &mut SD) {
@@ -47,9 +47,9 @@ seq!(N in 1..=500 {
 });
 
 pub fn run_fuzzed_plugins(c: &mut Criterion) {
-    let mut group = c.benchmark_group("500 increment plugins");
+    let mut group = c.benchmark_group("100 increment plugins");
 
-    seq!(N in 1..=500 {
+    seq!(N in 1..=100 {
         generate_collection!(#(Plugin~N,)*);
     });
 

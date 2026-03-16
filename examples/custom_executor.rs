@@ -1,7 +1,8 @@
 use typed_ecs::macros::generate_collection;
 use typed_ecs::{
     app::ShouldExit,
-    app::{App, ExecutorTrait},
+    app::App,
+    executor::ExecutorTrait,
     plugin::Plugin,
     plugin_collection::PluginCollection,
     shared_data::{PhantomSharedData, SharedData},
@@ -15,7 +16,11 @@ impl<SD: SharedData> Plugin<SD> for EmptyPlugin {}
 struct CustomExecutor;
 
 impl ExecutorTrait for CustomExecutor {
+    fn init() -> Self {
+        Self
+    }
     fn run<SD: SharedData, PC: PluginCollection<SD>, Executor: ExecutorTrait>(
+        self,
         app: App<SD, PC, Executor>,
     ) {
         let plugin_collection = &app.plugin_collection;
