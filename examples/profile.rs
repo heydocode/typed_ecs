@@ -12,6 +12,9 @@ use typed_ecs::{
 struct Sleep200msPlugin;
 
 impl<SD: SharedData> Plugin<SD> for Sleep200msPlugin {
+    fn build() -> Self {
+        Self
+    }
     fn update_ref_sd(&self, _sd: &SD) {
         // Makes the plugin's system noticeable
         // in the produced profiling trace.
@@ -21,6 +24,9 @@ impl<SD: SharedData> Plugin<SD> for Sleep200msPlugin {
 
 struct Plugin1;
 impl<SD: SharedData> Plugin<SD> for Plugin1 {
+    fn build() -> Self {
+        Self
+    }
     fn startup_ref_sd(&self, _sd: &SD) {
         println!("Hello from plugin 1!");
     }
@@ -28,6 +34,9 @@ impl<SD: SharedData> Plugin<SD> for Plugin1 {
 
 struct Plugin3;
 impl<SD: SharedData + AdditionalRequirement> Plugin<SD> for Plugin3 {
+    fn build() -> Self {
+        Self
+    }
     fn startup_ref_sd(&self, sd: &SD) {
         println!("Initial val value: {}", sd.get_val());
     }
@@ -47,6 +56,9 @@ impl<SD: SharedData + AdditionalRequirement> Plugin<SD> for Plugin3 {
 struct Plugin2;
 
 impl<SD: SharedData + AdditionalRequirement> Plugin<SD> for Plugin2 {
+    fn build() -> Self {
+        Self
+    }
     fn post_update_ref_sd(&self, sd: &SD) {
         let val = sd.get_val();
 
@@ -65,6 +77,9 @@ impl<SD: SharedData + AdditionalRequirement> Plugin<SD> for Plugin2 {
 struct CtrlCHandler;
 
 impl<SD: SharedData + AdditionalRequirement> Plugin<SD> for CtrlCHandler {
+    fn build() -> Self {
+        Self
+    }
     fn exit_check(&self, should_exit: &mut ShouldExit, sd: &SD) {
         if sd.get_i() >= 100 {
             should_exit.request_exit();
@@ -110,6 +125,6 @@ fn main() {
 
     generate_collection!(CtrlCHandler, Plugin1, Plugin2, Sleep200msPlugin, Plugin3,);
     // This is indeed a constant! A ZST, assembling multiple plugins into one scheduled runtime.
-    const COLLECTION: GeneratedPluginCollection<SDimpl> = build_generated_collection::<SDimpl>();
-    App::new(COLLECTION).run();
+    let collection: GeneratedPluginCollection<SDimpl> = build_generated_collection::<SDimpl>();
+    App::new(collection).run();
 }

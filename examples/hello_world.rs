@@ -8,12 +8,15 @@ use typed_ecs::{
 struct HelloWorldPlugin;
 
 impl<SD: SharedData> Plugin<SD> for HelloWorldPlugin {
-    fn startup_ref_sd(&self, _sd: &SD) {
+    fn build() -> Self {
+        Self
+    }
+    fn startup_ref_sd(&mut self, _sd: &SD) {
         println!("Hello, World!");
     }
     // This system runs in the end of each cycle,
     // so after startup, and after all updates.
-    fn exit_check(&self, should_exit: &mut ShouldExit, _sd: &SD) {
+    fn exit_check(&mut self, should_exit: &mut ShouldExit, _sd: &SD) {
         // Requests the program to exit. This request is guaranteed
         // to be heard, but not guaranteed to make the app exit immediately
         // (because it needs to run on_exit hooks).
@@ -25,6 +28,6 @@ fn main() {
     generate_collection!(HelloWorldPlugin);
     // PhantomSharedData indicates that no plugin require any memory space to operate.
     // See more about it in the SharedData trait (src/app.rs)
-    const COLLECTION: GeneratedPluginCollection<PhantomSharedData> = build_generated_collection();
-    App::new(COLLECTION).run();
+    let collection: GeneratedPluginCollection<PhantomSharedData> = build_generated_collection();
+    App::new(collection).run();
 }

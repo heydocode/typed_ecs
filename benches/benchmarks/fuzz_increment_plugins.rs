@@ -1,6 +1,6 @@
 use criterion::{Criterion, criterion_group};
-use typed_ecs::macros::generate_collection;
 use seq_macro::seq;
+use typed_ecs::macros::generate_collection;
 use typed_ecs::{
     app::{App, ShouldExit},
     plugin::Plugin,
@@ -34,11 +34,15 @@ impl CounterMemory for SDimpl {
 seq!(N in 1..=100 {
     struct Plugin~N;
     impl <SD: SharedData + CounterMemory>Plugin<SD> for Plugin~N {
-        fn update_mutref_sd(&self, sd: &mut SD) {
+        fn build() -> Self {
+            Self
+        }
+
+        fn update_mutref_sd(&mut self, sd: &mut SD) {
             sd.increment_i();
         }
 
-        fn exit_check(&self, should_exit: &mut ShouldExit, sd: &SD) {
+        fn exit_check(&mut self, should_exit: &mut ShouldExit, sd: &SD) {
             if sd.get_i() == 1_000 {
                 should_exit.request_exit();
             }
@@ -53,10 +57,13 @@ pub fn run_fuzzed_plugins(c: &mut Criterion) {
         generate_collection!(#(Plugin~N,)*);
     });
 
-    const COLLECTION: GeneratedPluginCollection<SDimpl> = build_generated_collection();
     group.bench_function("fuzz_empty_plugins", move |b| {
-        b.iter(|| App::new(COLLECTION).run());
+        b.iter(|| {
+            let collection: GeneratedPluginCollection<SDimpl> = build_generated_collection();
+            App::new(collection).run()
+        });
     });
+
     group.finish();
 }
 

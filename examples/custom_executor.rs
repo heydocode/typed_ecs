@@ -1,17 +1,21 @@
+use core::marker::PhantomData;
 use typed_ecs::macros::generate_collection;
 use typed_ecs::{
-    app::ShouldExit,
     app::App,
+    app::ShouldExit,
     executor::ExecutorTrait,
     plugin::Plugin,
     plugin_collection::PluginCollection,
     shared_data::{PhantomSharedData, SharedData},
 };
-use core::marker::PhantomData;
 
 struct EmptyPlugin;
 
-impl<SD: SharedData> Plugin<SD> for EmptyPlugin {}
+impl<SD: SharedData> Plugin<SD> for EmptyPlugin {
+    fn build() -> Self {
+        Self
+    }
+}
 
 struct CustomExecutor;
 
@@ -23,7 +27,7 @@ impl ExecutorTrait for CustomExecutor {
         self,
         app: App<SD, PC, Executor>,
     ) {
-        let plugin_collection = &app.plugin_collection;
+        let mut plugin_collection = app.plugin_collection;
         let mut sd = app.shared_data;
         // let mut should_exit = app.should_exit;
 
@@ -62,7 +66,7 @@ impl ExecutorTrait for CustomExecutor {
 fn main() {
     println!("Beginning of the `main` function...");
     generate_collection!(EmptyPlugin);
-    const COLLECTION: GeneratedPluginCollection<PhantomSharedData> = build_generated_collection();
-    App::new_with_executor(COLLECTION, PhantomData::<CustomExecutor>).run();
+    let collection: GeneratedPluginCollection<PhantomSharedData> = build_generated_collection();
+    App::new_with_executor(collection, PhantomData::<CustomExecutor>).run();
     println!("Ending of the `main` function...");
 }

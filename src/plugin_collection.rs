@@ -10,35 +10,35 @@ use crate::{app::ShouldExit, shared_data::SharedData};
 /// macro `generate_collection!`. Implementing it manually may, and will
 /// break the program!
 pub trait PluginCollection<SD: SharedData> {
-    async fn async_pre_startup_ref_sd_all(&self, sd: &SD);
-    async fn async_pre_startup_mutref_sd_all(&self, sd: &mut SD);
-    async fn async_startup_ref_sd_all(&self, sd: &SD);
-    async fn async_startup_mutref_sd_all(&self, sd: &mut SD);
-    async fn async_post_startup_ref_sd_all(&self, sd: &SD);
-    async fn async_post_startup_mutref_sd_all(&self, sd: &mut SD);
-    async fn async_pre_update_ref_sd_all(&self, sd: &SD);
-    async fn async_pre_update_mutref_sd_all(&self, sd: &mut SD);
-    async fn async_update_ref_sd_all(&self, sd: &SD);
-    async fn async_update_mutref_sd_all(&self, sd: &mut SD);
-    async fn async_post_update_ref_sd_all(&self, sd: &SD);
-    async fn async_post_update_mutref_sd_all(&self, sd: &mut SD);
-    async fn async_exit_check_all(&self, should_exit: &mut ShouldExit, sd: &SD);
-    async fn async_on_exit_all(&self, sd: &SD);
-    
-    fn pre_startup_ref_sd_all(&self, sd: &SD);
-    fn pre_startup_mutref_sd_all(&self, sd: &mut SD);
-    fn startup_ref_sd_all(&self, sd: &SD);
-    fn startup_mutref_sd_all(&self, sd: &mut SD);
-    fn post_startup_ref_sd_all(&self, sd: &SD);
-    fn post_startup_mutref_sd_all(&self, sd: &mut SD);
-    fn pre_update_ref_sd_all(&self, sd: &SD);
-    fn pre_update_mutref_sd_all(&self, sd: &mut SD);
-    fn update_ref_sd_all(&self, sd: &SD);
-    fn update_mutref_sd_all(&self, sd: &mut SD);
-    fn post_update_ref_sd_all(&self, sd: &SD);
-    fn post_update_mutref_sd_all(&self, sd: &mut SD);
-    fn exit_check_all(&self, should_exit: &mut ShouldExit, sd: &SD);
-    fn on_exit_all(&self, sd: &SD);
+    async fn async_pre_startup_ref_sd_all(&mut self, sd: &SD);
+    async fn async_pre_startup_mutref_sd_all(&mut self, sd: &mut SD);
+    async fn async_startup_ref_sd_all(&mut self, sd: &SD);
+    async fn async_startup_mutref_sd_all(&mut self, sd: &mut SD);
+    async fn async_post_startup_ref_sd_all(&mut self, sd: &SD);
+    async fn async_post_startup_mutref_sd_all(&mut self, sd: &mut SD);
+    async fn async_pre_update_ref_sd_all(&mut self, sd: &SD);
+    async fn async_pre_update_mutref_sd_all(&mut self, sd: &mut SD);
+    async fn async_update_ref_sd_all(&mut self, sd: &SD);
+    async fn async_update_mutref_sd_all(&mut self, sd: &mut SD);
+    async fn async_post_update_ref_sd_all(&mut self, sd: &SD);
+    async fn async_post_update_mutref_sd_all(&mut self, sd: &mut SD);
+    async fn async_exit_check_all(&mut self, should_exit: &mut ShouldExit, sd: &SD);
+    async fn async_on_exit_all(&mut self, sd: &SD);
+
+    fn pre_startup_ref_sd_all(&mut self, sd: &SD);
+    fn pre_startup_mutref_sd_all(&mut self, sd: &mut SD);
+    fn startup_ref_sd_all(&mut self, sd: &SD);
+    fn startup_mutref_sd_all(&mut self, sd: &mut SD);
+    fn post_startup_ref_sd_all(&mut self, sd: &SD);
+    fn post_startup_mutref_sd_all(&mut self, sd: &mut SD);
+    fn pre_update_ref_sd_all(&mut self, sd: &SD);
+    fn pre_update_mutref_sd_all(&mut self, sd: &mut SD);
+    fn update_ref_sd_all(&mut self, sd: &SD);
+    fn update_mutref_sd_all(&mut self, sd: &mut SD);
+    fn post_update_ref_sd_all(&mut self, sd: &SD);
+    fn post_update_mutref_sd_all(&mut self, sd: &mut SD);
+    fn exit_check_all(&mut self, should_exit: &mut ShouldExit, sd: &SD);
+    fn on_exit_all(&mut self, sd: &SD);
 
     // ------------------------------------------------------------
     // METHODS, THE DEFAULT IMPLEMENTATION OF WHOSE SHOULD NEVER BE
@@ -56,7 +56,7 @@ pub trait PluginCollection<SD: SharedData> {
     /// When all of the features listed above are disabled, the
     /// function gets optimized away, as it returns a ZST.
     #[inline(always)]
-    fn on_schedule_start(&self, _schedule: &'static str) -> impl Drop {
+    fn on_schedule_start(_schedule: &'static str) -> impl Drop {
         #[cfg(feature = "profile")]
         {
             let guard = tracing::info_span!("ecs_schedule", schedule = %_schedule).entered();
@@ -78,7 +78,6 @@ pub trait PluginCollection<SD: SharedData> {
     /// function gets optimized away, as it returns a ZST.
     #[inline(always)]
     fn on_system_start(
-        &self,
         _schedule: &'static str,
         _plugin: &'static str,
         _system: &'static str,

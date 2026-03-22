@@ -15,5 +15,5 @@ pub mod plugin_collection;
 pub mod profile;
 pub mod shared_data;
 
-pub use typed_ecs_macros as macros;
 pub use futures;
+pub use typed_ecs_macros as macros;

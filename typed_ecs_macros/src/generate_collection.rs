@@ -106,14 +106,14 @@ pub(crate) fn generate_plugin_collection_impl(
             #impl_contents
         }
 
-        pub const fn build_generated_collection<SD>()
+        pub fn build_generated_collection<SD>()
         -> GeneratedPluginCollection<SD>
         where
         SD: SharedDataUsedByTypedEcsMacro,
             #( #types: PluginUsedByTypedEcsMacro<SD>, )*
         {
             GeneratedPluginCollection::<SD> {
-                #(#quote_fields,)*
+                #(#fields: #types::build(),)*
                 _marker: PhantomDataUsedByTypedEcsMacro
             }
         }
@@ -132,7 +132,7 @@ fn generate_schedule(
     let is_async = schedule_name.contains("Async");
     let is_mut = system_name.contains("mutref");
     let exit_check = system_name.contains("exit_check");
-    
+
     let q_group = format_ident!("{}", system_group_name);
     let q_schedule = format_ident!("{}", schedule_name);
     let q_system = format_ident!("{}", system_name);
@@ -148,11 +148,11 @@ fn generate_schedule(
         if exit_check {
             quote! {
                 #[inline(always)]
-                async fn #q_group(&self, should_exit: &mut ShouldExit, sd: &SD) {
-                    let _sched_guard = self.on_schedule_start(stringify!(#q_schedule));
+                async fn #q_group(&mut self, should_exit: &mut ShouldExit, sd: &SD) {
+                    let _sched_guard = Self::on_schedule_start(stringify!(#q_schedule));
                     #(
                         {
-                            let _sys_guard = self.on_system_start(
+                            let _sys_guard = Self::on_system_start(
                                 stringify!(#q_schedule),
                                 stringify!(#types),
                                 stringify!(#q_system),
@@ -162,15 +162,14 @@ fn generate_schedule(
                     )*
                 }
             }
-        } 
-        else if is_mut {
+        } else if is_mut {
             quote! {
                 #[inline(always)]
-                async fn #q_group(&self, sd: &mut SD) {
-                    let _sched_guard = self.on_schedule_start(stringify!(#q_schedule));
+                async fn #q_group(&mut self, sd: &mut SD) {
+                    let _sched_guard = Self::on_schedule_start(stringify!(#q_schedule));
                     #(
                         {
-                            let _sys_guard = self.on_system_start(
+                            let _sys_guard = Self::on_system_start(
                                 stringify!(#q_schedule),
                                 stringify!(#types),
                                 stringify!(#q_system),
@@ -183,12 +182,12 @@ fn generate_schedule(
         } else {
             quote! {
                 #[inline(always)]
-                async fn #q_group(&self, sd: &SD) {
-                    let _sched_guard = self.on_schedule_start(stringify!(#q_schedule));
+                async fn #q_group(&mut self, sd: &SD) {
+                    let _sched_guard = Self::on_schedule_start(stringify!(#q_schedule));
                     let _ = futures_used_by_typed_ecs_macro::join! {
                         #(
                             async {
-                                let _sys_guard = self.on_system_start(
+                                let _sys_guard = Self::on_system_start(
                                     stringify!(#q_schedule),
                                     stringify!(#types),
                                     stringify!(#q_system),
@@ -204,11 +203,11 @@ fn generate_schedule(
         if exit_check {
             quote! {
                 #[inline(always)]
-                fn #q_group(&self, should_exit: &mut ShouldExit, sd: &SD) {
-                    let _sched_guard = self.on_schedule_start(stringify!(#q_schedule));
+                fn #q_group(&mut self, should_exit: &mut ShouldExit, sd: &SD) {
+                    let _sched_guard = Self::on_schedule_start(stringify!(#q_schedule));
                     #(
                         {
-                            let _sys_guard = self.on_system_start(
+                            let _sys_guard = Self::on_system_start(
                                 stringify!(#q_schedule),
                                 stringify!(#types),
                                 stringify!(#q_system),
@@ -218,15 +217,14 @@ fn generate_schedule(
                     )*
                 }
             }
-        } 
-        else if is_mut {
+        } else if is_mut {
             quote! {
                 #[inline(always)]
-                fn #q_group(&self, sd: &mut SD) {
-                    let _sched_guard = self.on_schedule_start(stringify!(#q_schedule));
+                fn #q_group(&mut self, sd: &mut SD) {
+                    let _sched_guard = Self::on_schedule_start(stringify!(#q_schedule));
                     #(
                         {
-                            let _sys_guard = self.on_system_start(
+                            let _sys_guard = Self::on_system_start(
                                 stringify!(#q_schedule),
                                 stringify!(#types),
                                 stringify!(#q_system),
@@ -239,11 +237,11 @@ fn generate_schedule(
         } else {
             quote! {
                 #[inline(always)]
-                fn #q_group(&self, sd: &SD) {
-                    let _sched_guard = self.on_schedule_start(stringify!(#q_schedule));
+                fn #q_group(&mut self, sd: &SD) {
+                    let _sched_guard = Self::on_schedule_start(stringify!(#q_schedule));
                     #(
                         {
-                            let _sys_guard = self.on_system_start(
+                            let _sys_guard = Self::on_system_start(
                                 stringify!(#q_schedule),
                                 stringify!(#types),
                                 stringify!(#q_system),

@@ -7,7 +7,10 @@ use typed_ecs::{
 
 struct Plugin1;
 impl<SD: SharedData> Plugin<SD> for Plugin1 {
-    fn startup_ref_sd(&self, _sd: &SD) {
+    fn build() -> Self {
+        Self
+    }
+    fn startup_ref_sd(&mut self, _sd: &SD) {
         println!("Hello from plugin 1!");
     }
 }
@@ -15,6 +18,9 @@ impl<SD: SharedData> Plugin<SD> for Plugin1 {
 struct Plugin2;
 
 impl<SD: SharedData> Plugin<SD> for Plugin2 {
+    fn build() -> Self {
+        Self
+    }
     /* Empty plugin, will it be optimized away? For sure! */
 }
 
@@ -26,11 +32,14 @@ impl Plugin2 {
 
 struct Plugin3;
 impl<SD: SharedData + AdditionalRequirement> Plugin<SD> for Plugin3 {
-    fn startup_ref_sd(&self, sd: &SD) {
+    fn build() -> Self {
+        Self
+    }
+    fn startup_ref_sd(&mut self, sd: &SD) {
         println!("Initial val value: {}", sd.get_val());
     }
 
-    fn pre_update_mutref_sd(&self, sd: &mut SD) {
+    fn pre_update_mutref_sd(&mut self, sd: &mut SD) {
         let val = sd.get_val();
 
         if !(val >= u8::MAX - 1) {
@@ -45,13 +54,16 @@ impl<SD: SharedData + AdditionalRequirement> Plugin<SD> for Plugin3 {
 struct Plugin4;
 
 impl<SD: SharedData + AdditionalRequirement> Plugin<SD> for Plugin4 {
-    fn post_update_ref_sd(&self, sd: &SD) {
+    fn build() -> Self {
+        Self
+    }
+    fn post_update_ref_sd(&mut self, sd: &SD) {
         let val = sd.get_val();
 
         println!("Current val: {}", val);
     }
 
-    fn on_exit(&self, sd: &SD) {
+    fn on_exit(&mut self, sd: &SD) {
         let val = sd.get_val();
         let i = sd.get_i();
 
@@ -63,7 +75,10 @@ impl<SD: SharedData + AdditionalRequirement> Plugin<SD> for Plugin4 {
 struct CtrlCHandler;
 
 impl<SD: SharedData + AdditionalRequirement> Plugin<SD> for CtrlCHandler {
-    fn exit_check(&self, should_exit: &mut ShouldExit, sd: &SD) {
+    fn build() -> Self {
+        Self
+    }
+    fn exit_check(&mut self, should_exit: &mut ShouldExit, sd: &SD) {
         if sd.get_i() >= 100 {
             should_exit.request_exit();
         }
@@ -108,6 +123,6 @@ fn main() {
     // This is indeed a constant! A ZST, assembling multiple plugins into one scheduled runtime.
     // Note that you can define it like `let collection: ...`, a constant is there only to show that
     // it's a const-friendly value, but if you define it as a variable, make sure to still explicitely type it!
-    const COLLECTION: GeneratedPluginCollection<SDimpl> = build_generated_collection::<SDimpl>();
-    App::new(COLLECTION).run();
+    let collection: GeneratedPluginCollection<SDimpl> = build_generated_collection::<SDimpl>();
+    App::new(collection).run();
 }

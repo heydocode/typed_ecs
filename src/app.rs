@@ -1,6 +1,6 @@
 use core::marker::PhantomData;
 
-use crate::executor::{ExecutorTrait, DefaultExecutor};
+use crate::executor::{DefaultExecutor, ExecutorTrait};
 
 use crate::{plugin_collection::PluginCollection, shared_data::SharedData};
 

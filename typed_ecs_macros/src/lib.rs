@@ -3,8 +3,8 @@ mod generate_collection;
 use proc_macro::TokenStream;
 use quote::quote;
 
-use syn::{punctuated::Punctuated, *};
 use quote::format_ident;
+use syn::{punctuated::Punctuated, *};
 
 use crate::generate_collection::generate_plugin_collection_impl;
 
