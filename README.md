@@ -13,7 +13,7 @@ This project is in active development but technically is ready to be used, just 
 `typed_ecs` is a tiny, zero-cost framework that:
 
 - lets you wire plugins together at **compile time**, without runtime overhead
-- is written for `no_std` and `no_alloc` environments, but still optimized for very powerful machines (profiling, async and parallel execution built-in)
+- is written for `no_std` and `no_alloc` environments, but also for capable machines (profiling, async and parallel execution built-in)
 - contains no runtime (only a defined during compile-time execution logic): every plugin gets optimized by the compiler to the point that the produced assembly is comparable to a hand-written loop (see the godbolt section below)
 - allows you to do async IO stuff without extra boilerplate
 
