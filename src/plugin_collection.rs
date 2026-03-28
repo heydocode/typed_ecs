@@ -10,35 +10,33 @@ use crate::{app::ShouldExit, shared_data::SharedData};
 /// macro `generate_collection!`. Implementing it manually may, and will
 /// break the program!
 pub trait PluginCollection<SD: SharedData> {
-    async fn async_pre_startup_ref_sd_all(&mut self, sd: &SD);
-    async fn async_pre_startup_mutref_sd_all(&mut self, sd: &mut SD);
-    async fn async_startup_ref_sd_all(&mut self, sd: &SD);
-    async fn async_startup_mutref_sd_all(&mut self, sd: &mut SD);
-    async fn async_post_startup_ref_sd_all(&mut self, sd: &SD);
-    async fn async_post_startup_mutref_sd_all(&mut self, sd: &mut SD);
-    async fn async_pre_update_ref_sd_all(&mut self, sd: &SD);
-    async fn async_pre_update_mutref_sd_all(&mut self, sd: &mut SD);
-    async fn async_update_ref_sd_all(&mut self, sd: &SD);
-    async fn async_update_mutref_sd_all(&mut self, sd: &mut SD);
-    async fn async_post_update_ref_sd_all(&mut self, sd: &SD);
-    async fn async_post_update_mutref_sd_all(&mut self, sd: &mut SD);
-    async fn async_exit_check_all(&mut self, should_exit: &mut ShouldExit, sd: &SD);
-    async fn async_on_exit_all(&mut self, sd: &SD);
+    // STARTUP
+    fn startup_all(&mut self, _sd: &SD);
+    fn apply_startup_all(&mut self, _sd: &mut SD);
 
-    fn pre_startup_ref_sd_all(&mut self, sd: &SD);
-    fn pre_startup_mutref_sd_all(&mut self, sd: &mut SD);
-    fn startup_ref_sd_all(&mut self, sd: &SD);
-    fn startup_mutref_sd_all(&mut self, sd: &mut SD);
-    fn post_startup_ref_sd_all(&mut self, sd: &SD);
-    fn post_startup_mutref_sd_all(&mut self, sd: &mut SD);
-    fn pre_update_ref_sd_all(&mut self, sd: &SD);
-    fn pre_update_mutref_sd_all(&mut self, sd: &mut SD);
-    fn update_ref_sd_all(&mut self, sd: &SD);
-    fn update_mutref_sd_all(&mut self, sd: &mut SD);
-    fn post_update_ref_sd_all(&mut self, sd: &SD);
-    fn post_update_mutref_sd_all(&mut self, sd: &mut SD);
-    fn exit_check_all(&mut self, should_exit: &mut ShouldExit, sd: &SD);
-    fn on_exit_all(&mut self, sd: &SD);
+    async fn async_startup_all(&mut self, _sd: &SD);
+    fn apply_async_startup_all(&mut self, _sd: &mut SD);
+
+    // LOOP - UPDATES
+
+    fn pre_update_all(&mut self, _sd: &SD);
+    fn apply_pre_update_all(&mut self, _sd: &mut SD);
+
+    fn update_all(&mut self, _sd: &SD);
+    fn apply_update_all(&mut self, _sd: &mut SD);
+
+    fn post_update_all(&mut self, _sd: &SD);
+    fn apply_post_update_all(&mut self, _sd: &mut SD);
+
+    async fn async_update_all(&mut self, _sd: &SD);
+    fn apply_async_update_all(&mut self, _sd: &mut SD);
+
+    fn exit_check_all(&mut self, _should_exit: &mut ShouldExit, _sd: &SD);
+
+    // SHUTDOWN (runs once)
+
+    fn on_exit_all(&mut self, _sd: &SD);
+    async fn async_on_exit_all(&mut self, _sd: &SD);
 
     // ------------------------------------------------------------
     // METHODS, THE DEFAULT IMPLEMENTATION OF WHOSE SHOULD NEVER BE

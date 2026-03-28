@@ -38,7 +38,7 @@ seq!(N in 1..=100 {
             Self
         }
 
-        fn update_mutref_sd(&mut self, sd: &mut SD) {
+        fn apply_update(&mut self, sd: &mut SD) {
             sd.increment_i();
         }
 

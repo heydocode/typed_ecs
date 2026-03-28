@@ -52,7 +52,8 @@ impl<SD: SharedData, PC: PluginCollection<SD>, Executor: ExecutorTrait> App<SD, 
         }
     }
 
-    pub fn run(self) {
-        Executor::init().run(self);
+    pub async fn run(mut self) {
+        let mut executor = Executor::init();
+        executor.run(&mut self).await;
     }
 }

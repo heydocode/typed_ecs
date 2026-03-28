@@ -3,63 +3,51 @@
 use crate::{app::ShouldExit, shared_data::SharedData};
 
 pub trait Plugin<SD: SharedData> {
+    // Methods are in their order of execution
+    
+    // APP INIT - PRE STARTUP
+    fn build() -> Self;
+    
+    // STARTUP
     #[inline(always)]
-    async fn async_pre_startup_ref_sd(&mut self, _sd: &SD) {}
+    fn startup(&mut self, _sd: &SD) {}
     #[inline(always)]
-    async fn async_pre_startup_mutref_sd(&mut self, _sd: &mut SD) {}
+    fn apply_startup(&mut self, _sd: &mut SD) {}
+    
     #[inline(always)]
-    async fn async_startup_ref_sd(&mut self, _sd: &SD) {}
+    async fn async_startup(&mut self, _sd: &SD) {}
     #[inline(always)]
-    async fn async_startup_mutref_sd(&mut self, _sd: &mut SD) {}
-    #[inline(always)]
-    async fn async_post_startup_ref_sd(&mut self, _sd: &SD) {}
-    #[inline(always)]
-    async fn async_post_startup_mutref_sd(&mut self, _sd: &mut SD) {}
-    #[inline(always)]
-    async fn async_pre_update_ref_sd(&mut self, _sd: &SD) {}
-    #[inline(always)]
-    async fn async_pre_update_mutref_sd(&mut self, _sd: &mut SD) {}
-    #[inline(always)]
-    async fn async_update_ref_sd(&mut self, _sd: &SD) {}
-    #[inline(always)]
-    async fn async_update_mutref_sd(&mut self, _sd: &mut SD) {}
-    #[inline(always)]
-    async fn async_post_update_ref_sd(&mut self, _sd: &SD) {}
-    #[inline(always)]
-    async fn async_post_update_mutref_sd(&mut self, _sd: &mut SD) {}
-    #[inline(always)]
-    async fn async_exit_check(&mut self, _should_exit: &mut ShouldExit, _sd: &SD) {}
-    #[inline(always)]
-    async fn async_on_exit(&mut self, _sd: &SD) {}
+    fn apply_async_startup(&mut self, _sd: &mut SD) {}
+    
+    // LOOP - UPDATES
 
     #[inline(always)]
-    fn pre_startup_ref_sd(&mut self, _sd: &SD) {}
+    fn pre_update(&mut self, _sd: &SD) {}
     #[inline(always)]
-    fn pre_startup_mutref_sd(&mut self, _sd: &mut SD) {}
+    fn apply_pre_update(&mut self, _sd: &mut SD) {}
+    
     #[inline(always)]
-    fn startup_ref_sd(&mut self, _sd: &SD) {}
+    fn update(&mut self, _sd: &SD) {}
     #[inline(always)]
-    fn startup_mutref_sd(&mut self, _sd: &mut SD) {}
+    fn apply_update(&mut self, _sd: &mut SD) {}
+    
     #[inline(always)]
-    fn post_startup_ref_sd(&mut self, _sd: &SD) {}
+    fn post_update(&mut self, _sd: &SD) {}
     #[inline(always)]
-    fn post_startup_mutref_sd(&mut self, _sd: &mut SD) {}
+    fn apply_post_update(&mut self, _sd: &mut SD) {}
+    
     #[inline(always)]
-    fn pre_update_ref_sd(&mut self, _sd: &SD) {}
+    async fn async_update(&mut self, _sd: &SD) {}
     #[inline(always)]
-    fn pre_update_mutref_sd(&mut self, _sd: &mut SD) {}
-    #[inline(always)]
-    fn update_ref_sd(&mut self, _sd: &SD) {}
-    #[inline(always)]
-    fn update_mutref_sd(&mut self, _sd: &mut SD) {}
-    #[inline(always)]
-    fn post_update_ref_sd(&mut self, _sd: &SD) {}
-    #[inline(always)]
-    fn post_update_mutref_sd(&mut self, _sd: &mut SD) {}
+    fn apply_async_update(&mut self, _sd: &mut SD) {}
+    
     #[inline(always)]
     fn exit_check(&mut self, _should_exit: &mut ShouldExit, _sd: &SD) {}
+    
+    // SHUTDOWN (runs once)
+    
     #[inline(always)]
     fn on_exit(&mut self, _sd: &SD) {}
-
-    fn build() -> Self;
+    #[inline(always)]
+    async fn async_on_exit(&mut self, _sd: &SD) {}
 }

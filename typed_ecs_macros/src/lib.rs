@@ -1,4 +1,5 @@
 mod generate_collection;
+mod schedule_contents;
 
 use proc_macro::TokenStream;
 use quote::quote;

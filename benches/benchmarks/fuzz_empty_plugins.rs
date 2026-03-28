@@ -44,7 +44,7 @@ impl<SD: SharedData + CounterMemory> Plugin<SD> for ExitCounterPlugin {
         }
     }
 
-    fn update_mutref_sd(&mut self, sd: &mut SD) {
+    fn apply_update(&mut self, sd: &mut SD) {
         sd.increment_i();
     }
 }

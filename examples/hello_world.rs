@@ -11,7 +11,7 @@ impl<SD: SharedData> Plugin<SD> for HelloWorldPlugin {
     fn build() -> Self {
         Self
     }
-    fn startup_ref_sd(&mut self, _sd: &SD) {
+    fn startup(&mut self, _sd: &SD) {
         println!("Hello, World!");
     }
     // This system runs in the end of each cycle,
@@ -24,10 +24,11 @@ impl<SD: SharedData> Plugin<SD> for HelloWorldPlugin {
     }
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
     generate_collection!(HelloWorldPlugin);
     // PhantomSharedData indicates that no plugin require any memory space to operate.
     // See more about it in the SharedData trait (src/app.rs)
     let collection: GeneratedPluginCollection<PhantomSharedData> = build_generated_collection();
-    App::new(collection).run();
+    App::new(collection).run().await;
 }

@@ -1,116 +1,51 @@
+#![allow(async_fn_in_trait)]
 use crate::{app::App, plugin_collection::PluginCollection, shared_data::SharedData};
 
-#[cfg(feature = "std")]
 pub struct DefaultExecutor;
 
-#[cfg(feature = "std")]
 impl ExecutorTrait for DefaultExecutor {
     fn init() -> Self {
         Self
     }
-    fn run<SD: SharedData, PC: PluginCollection<SD>, Executor: ExecutorTrait>(
-        self,
-        app: App<SD, PC, Executor>,
+    async fn run<SD: SharedData, PC: PluginCollection<SD>, Executor: ExecutorTrait>(
+        &mut self,
+        app: &mut App<SD, PC, Executor>,
     ) {
-        tokio::runtime::Builder::new_multi_thread()
-            .enable_all()
-            .build()
-            .unwrap()
-            .block_on(async {
-                let mut plugin_collection = app.plugin_collection;
-                let mut sd = app.shared_data;
-                let mut should_exit = app.should_exit;
+        app.plugin_collection.startup_all(&app.shared_data);
+        app.plugin_collection.apply_startup_all(&mut app.shared_data);
+        
+        app.plugin_collection.async_startup_all(&app.shared_data).await;
+        app.plugin_collection.apply_async_startup_all(&mut app.shared_data);
 
-                plugin_collection.async_startup_ref_sd_all(&sd).await;
-                plugin_collection.async_startup_mutref_sd_all(&mut sd).await;
-
-                plugin_collection.startup_ref_sd_all(&sd);
-                plugin_collection.startup_mutref_sd_all(&mut sd);
-
-                while !should_exit.get_val() {
-                    plugin_collection.async_pre_update_ref_sd_all(&sd).await;
-                    plugin_collection
-                        .async_pre_update_mutref_sd_all(&mut sd)
-                        .await;
-                    plugin_collection.async_update_ref_sd_all(&sd).await;
-                    plugin_collection.async_update_mutref_sd_all(&mut sd).await;
-                    plugin_collection.async_post_update_ref_sd_all(&sd).await;
-                    plugin_collection
-                        .async_post_update_mutref_sd_all(&mut sd)
-                        .await;
-                    plugin_collection
-                        .async_exit_check_all(&mut should_exit, &sd)
-                        .await;
-
-                    plugin_collection.pre_update_ref_sd_all(&sd);
-                    plugin_collection.pre_update_mutref_sd_all(&mut sd);
-                    plugin_collection.update_ref_sd_all(&sd);
-                    plugin_collection.update_mutref_sd_all(&mut sd);
-                    plugin_collection.post_update_ref_sd_all(&sd);
-                    plugin_collection.post_update_mutref_sd_all(&mut sd);
-                    plugin_collection.exit_check_all(&mut should_exit, &sd);
-                }
-                plugin_collection.on_exit_all(&sd);
-            })
-    }
-}
-
-#[cfg(feature = "no-std")]
-pub struct EmbassyExecutor;
-
-#[cfg(feature = "no-std")]
-impl ExecutorTrait for EmbassyExecutor {
-    fn init() -> Self {
-        Self
-    }
-    fn run<SD: SharedData, PC: PluginCollection<SD>, Executor: ExecutorTrait>(
-        self,
-        app: App<SD, PC, Executor>,
-    ) {
-        tokio::runtime::Builder::new_multi_thread()
-            .enable_all()
-            .build()
-            .unwrap()
-            .block_on(async {
-                let plugin_collection = &app.plugin_collection;
-                let mut sd = app.shared_data;
-                let mut should_exit = app.should_exit;
-
-                plugin_collection.startup_ref_sd_all(&sd);
-                plugin_collection.startup_mutref_sd_all(&mut sd);
-
-                while !should_exit.get_val() {
-                    plugin_collection.async_pre_update_ref_sd_all(&sd).await;
-                    plugin_collection
-                        .async_pre_update_mutref_sd_all(&mut sd)
-                        .await;
-                    plugin_collection.async_update_ref_sd_all(&sd).await;
-                    plugin_collection.async_update_mutref_sd_all(&mut sd).await;
-                    plugin_collection.async_post_update_ref_sd_all(&sd).await;
-                    plugin_collection
-                        .async_post_update_mutref_sd_all(&mut sd)
-                        .await;
-                    plugin_collection
-                        .async_exit_check_all(&mut should_exit, &sd)
-                        .await;
-
-                    plugin_collection.pre_update_ref_sd_all(&sd);
-                    plugin_collection.pre_update_mutref_sd_all(&mut sd);
-                    plugin_collection.update_ref_sd_all(&sd);
-                    plugin_collection.update_mutref_sd_all(&mut sd);
-                    plugin_collection.post_update_ref_sd_all(&sd);
-                    plugin_collection.post_update_mutref_sd_all(&mut sd);
-                    plugin_collection.exit_check_all(&mut should_exit, &sd);
-                }
-                plugin_collection.on_exit_all(&sd);
-            })
+        loop {
+            app.plugin_collection.pre_update_all(&app.shared_data);
+            app.plugin_collection.apply_pre_update_all(&mut app.shared_data);
+            
+            app.plugin_collection.update_all(&app.shared_data);
+            app.plugin_collection.apply_update_all(&mut app.shared_data);
+            
+            app.plugin_collection.post_update_all(&app.shared_data);
+            app.plugin_collection.apply_post_update_all(&mut app.shared_data);
+            
+            app.plugin_collection.exit_check_all(&mut app.should_exit, &app.shared_data);
+            
+            if app.should_exit.get_val() {
+                break;
+            }
+            
+            app.plugin_collection.async_update_all(&app.shared_data).await;
+            app.plugin_collection.apply_async_update_all(&mut app.shared_data);
+        }
+        
+        app.plugin_collection.on_exit_all(&app.shared_data);
+        app.plugin_collection.async_on_exit_all(&app.shared_data).await;
     }
 }
 
 pub trait ExecutorTrait {
     fn init() -> Self;
-    fn run<SD: SharedData, PC: PluginCollection<SD>, Executor: ExecutorTrait>(
-        self,
-        app: App<SD, PC, Executor>,
+    async fn run<SD: SharedData, PC: PluginCollection<SD>, Executor: ExecutorTrait>(
+        &mut self,
+        app: &mut App<SD, PC, Executor>,
     );
 }
