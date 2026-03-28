@@ -4,31 +4,30 @@
 [![Alloc-free](https://img.shields.io/badge/no__alloc-supported-brightgreen)](https://doc.rust-lang.org/alloc/)
 [![License](https://img.shields.io/badge/license-MIT-orange)](https://github.com/heydocode/typed_ecs)
 
-A `no_std` and `no-alloc` tiny ECS written in Rust, which provides strong compile-time guarantees.
+A `no_std` and `no-alloc` compatible tiny ECS written in Rust, which provides strong compile-time guarantees.
 
 This project is in active development but technically is ready to be used, just note that its API will break often until v0.1.x releases.
-
-Also, its ergonomicity and flexibility, despite the compile-time guarantees, will improve over time.
 
 ## About
 
 `typed_ecs` is a tiny, zero-cost framework that:
 
 - lets you wire plugins together at **compile time**, without runtime overhead
-- enforces plugin collection / plugin / shared-data compatibility via Rust trait bounds (no runtime checking)
-- is written for `no_std` and `no_alloc` environments, but still optimized for very powerful machines (profiling built-in, multithreading and async coming! (TODO!))
-- contains no runtime (only a scheduler): every plugin gets optimized by the compiler to the point that the produced assembly is comparable to a hand-written loop (see the godbolt section below)
-- has no dependencies! (Profiling dependencies are not taken into account, because these are enabled on feature, and are not advised in releases)
+- is written for `no_std` and `no_alloc` environments, but also for capable machines (profiling, async and parallel execution built-in)
+- contains no runtime (only a defined during compile-time execution logic): every plugin gets optimized by the compiler to the point that the produced assembly is comparable to a hand-written loop (see the godbolt section below)
+- allows you to do async IO stuff without extra boilerplate
 
 ## Key features
 
 - `no_std` compatible, and `no-alloc`: all kinds of platforms supported!
 - Compile-time plugin composition (in plugin collections)
-- Strong compile-time guarantees for plugin/SharedData compatibility
+- Strong compile-time guarantees
 - Zero runtime-registration or reflection — everything resolved at compile time
 - Light, optimized scheduler loop, with **direct** plugin calls (no indirection, no v-tables, and other overhead)
-- Ergonomic design: no tricky or cryptic code needed to use `typed_ecs` (only one essential and transparent macro)
-- Flexible: you can publish third-party plugins that other users could add in their applications in a plug & play manner (in the future, this process will be more documented)
+- Built-in parallelism: on platforms supporting it, all (!) non-applying systems are runned in parallel
+- Async aboard! No need to do cursed stuff to handle IO: it's tightly integrated with typed_ecs!
+- Ergonomic design: no tricky or cryptic code needed to use `typed_ecs`: only one transparent macro
+- Community-ready: you can publish third-party plugins that other users could add in their applications in a plug & play manner (in the future, this process will be more documented)
 
 ## Examples
 
@@ -43,26 +42,19 @@ cargo run --example hello_world
 Check the `examples/` directory for more comprehensive examples, including:
 
 - `hello_world.rs`: Plugin definition and message on startup
-- `plugin_collection.rs`: Explanation of how to use plugin collections
+- `plugin_collection.rs`: Explanation of how to build a plugin collection
 - `profile.rs`: Usage of the crate's built-in profiling
 
 ## Compile time optimizations demonstration
 
 You may yourself test how `typed_ecs` examples produce neat, highly optimized
-assembly, by putting the [`godbolt_analysis.rs`](godbolt_analysis.rs) file contents into [`Godbolt`](https://godbolt.org/).
-
-Moreover, this file contains guidance for analyzing other examples and how to export the crate into one file, 
-then how append the example code in it, using [`cargo-expand`](https://crates.io/crates/cargo-expand)
-
-Alternatively, you can go [to this link](https://godbolt.org/z/1KeTjExh3) (Godbolt) in order to view these optimizations without pasting anything. Though, note that this link is updated by hand, and may be outdated!
-
-In the future, a special util will be developed, in order to automate the process of creating a single godbolt-ready file, for assembly analysis purposes.
+assembly, by going to [this link](https://godbolt.org/z/1KeTjExh3) (Godbolt).
 
 ## Profiling with [`tracing`](https://github.com/tokio-rs/tracing)
 
 ### Example
 
-There's a `examples/profile.rs` example for that! Check it out with:
+There's an `examples/profile.rs` example for that! Check it out with:
 ```sh
 git clone https://github.com/heydocode/typed_ecs.git
 cd typed_ecs
@@ -72,14 +64,7 @@ cargo run --example profile --features=profile-forest
 
 ### Why?
 
-Tracing crate allows to easily profile Rust applications, a process that helps finding and resolving performance bottlenecks. Profilers play a critical role in optimizing software, and producing performant applications / games.
-
-### Note on profiled "dead" systems execution time
-
-When you'll profile your app that uses `typed_ecs`, you'll notice something: some "dead" (= empty) systems seem to execute, and seem to not be fully optimized away, but that's the case! When you see a system running for 200-1000ns, depending on the profiler and your hardware, that's simply the begin recording function overhead. In fact, even when the system is completely optimized away, the recording function (in the case of systems: inside the `on_system_start` hook) takes time to create a span, then send it before dropping it, and finally execute the `Drop` implementation of the span, which purpose is to stop the timer. This process takes time and therefore it seems that systems that should have been optimized away are still there (which is, again, not the case). And if you wonder why if it's optimized away, you see the current schedule, system name, and even its plugin displayed, that's the work of the proc-macro `generate_collection`!
-EDIT: It may more be a thing of optimization - make sure using O3 optimizations and higher. 
-
-Obviously, this kind of overhead is completely vanishing when the `profile` feature is disabled.
+Tracing crate allows to easily profile Rust applications, a process that helps finding and resolving performance bottlenecks. Profilers play a critical role in optimizing software, and producing performant software. 
 
 ### Built-in `tracing` backends
 
@@ -102,14 +87,12 @@ want to enable a profiler via a dedicated feature (`profile-tracy` for Tracy or 
 
 After the benches, you should see an html report at `target/criterion/report/index.html`.
 
-If you don't see it, try cleaning the building artefacts and re-benching:
+If you don't see it, try cleaning the building artefacts and re-benching a few times:
 
 ```sh
 cargo clean
 cargo bench
-```
-
-Repeat this a few times until you see the HTML report. (It may be just a personal issue that it doesn't get generated at the first time, but I prefer leaving it there in case it's not).
+``` 
 
 ## Contributing
 
