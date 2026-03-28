@@ -51,16 +51,20 @@ seq!(N in 1..=100 {
 });
 
 pub fn run_fuzzed_plugins(c: &mut Criterion) {
+    let rt = tokio::runtime::Runtime::new().unwrap();
+    let _guard = rt.enter();
     let mut group = c.benchmark_group("100 increment plugins");
 
     seq!(N in 1..=100 {
         generate_collection!(#(Plugin~N,)*);
     });
 
-    group.bench_function("fuzz_empty_plugins", move |b| {
+    group.bench_function("fuzz_increment_plugins", move |b| {
         b.iter(|| {
             let collection: GeneratedPluginCollection<SDimpl> = build_generated_collection();
-            App::new(collection).run()
+            rt.block_on(tokio::spawn(async {
+                App::new(collection).run().await
+            })).unwrap();
         });
     });
 
