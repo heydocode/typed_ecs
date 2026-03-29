@@ -28,7 +28,7 @@ pub(crate) fn generate_schedule(
             #[inline(always)]
             async fn #q_group(&mut self, sd: &SD) {
                 let _sched_guard = Self::on_schedule_start(stringify!(#q_schedule));
-                let _ = futures_used_by_typed_ecs_macro::join! {
+                let _ = ::typed_ecs::futures::join! {
                     #(
                         async {
                             let _sys_guard = Self::on_system_start(
@@ -46,7 +46,7 @@ pub(crate) fn generate_schedule(
         if exit_check {
             quote! {
                 #[inline(always)]
-                fn #q_group(&mut self, should_exit: &mut ShouldExit, sd: &SD) {
+                fn #q_group(&mut self, should_exit: &mut ::typed_ecs::app::ShouldExit, sd: &SD) {
                     let _sched_guard = Self::on_schedule_start(stringify!(#q_schedule));
                     #(
                         {

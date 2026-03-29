@@ -57,23 +57,17 @@ pub(crate) fn generate_plugin_collection_impl(
     }
 
     let expanded = quote! {
-        use core::marker::PhantomData as PhantomDataUsedByTypedEcsMacro;
-        use typed_ecs::plugin_collection::PluginCollection as PluginCollectionUsedByTypedEcsMacro;
-        use typed_ecs::shared_data::SharedData as SharedDataUsedByTypedEcsMacro;
-        use typed_ecs::plugin::Plugin as PluginUsedByTypedEcsMacro;
-        use typed_ecs::futures as futures_used_by_typed_ecs_macro;
-
         pub struct GeneratedPluginCollection<SD> {
             #(#quote_fields,)*
-            _marker: PhantomDataUsedByTypedEcsMacro<SD>
+            _marker: ::core::marker::PhantomData<SD>
         }
 
-        impl <SD>PluginCollectionUsedByTypedEcsMacro<SD> for GeneratedPluginCollection<SD>
-        where SD: SharedDataUsedByTypedEcsMacro,
+        impl <SD>::typed_ecs::plugin_collection::PluginCollection<SD> for GeneratedPluginCollection<SD>
+        where SD: ::typed_ecs::shared_data::SharedData,
         // Even if this appears to do nothing as the hard check is done
         // in build_generated_collection, never remove it: it allows
         // lazy trait evaluation.
-        #( #types: PluginUsedByTypedEcsMacro<SD>, )*
+        #( #types: ::typed_ecs::plugin::Plugin<SD>, )*
         {
             #impl_contents
         }
@@ -81,12 +75,12 @@ pub(crate) fn generate_plugin_collection_impl(
         pub fn build_generated_collection<SD>()
         -> GeneratedPluginCollection<SD>
         where
-        SD: SharedDataUsedByTypedEcsMacro,
-            #( #types: PluginUsedByTypedEcsMacro<SD>, )*
+        SD: ::typed_ecs::shared_data::SharedData,
+            #( #types: ::typed_ecs::plugin::Plugin<SD>, )*
         {
             GeneratedPluginCollection::<SD> {
                 #(#fields: #types::build(),)*
-                _marker: PhantomDataUsedByTypedEcsMacro
+                _marker: ::core::marker::PhantomData
             }
         }
     };

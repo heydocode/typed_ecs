@@ -2,7 +2,6 @@ use core::marker::PhantomData;
 use typed_ecs::macros::generate_collection;
 use typed_ecs::{
     app::App,
-    app::ShouldExit,
     executor::ExecutorTrait,
     plugin::Plugin,
     plugin_collection::PluginCollection,
