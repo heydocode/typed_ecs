@@ -7,6 +7,11 @@ pub(crate) fn generate_schedule(
     schedule_name: &'static str,
     system_name: &'static str,
 ) -> TokenStream {
+    #[cfg(feature = "parallel")]
+    const IS_PARALLEL: bool = true;
+    #[cfg(not(feature = "parallel"))]
+    const IS_PARALLEL: bool = false;
+
     let system_group_name = format!("{}_all", system_name);
     let is_async = system_name.starts_with("async_");
     let is_mut = system_name.contains("apply");
@@ -78,20 +83,40 @@ pub(crate) fn generate_schedule(
                 }
             }
         } else {
-            quote! {
-                #[inline(always)]
-                fn #q_group(&mut self, sd: &SD) {
-                    let _sched_guard = Self::on_schedule_start(stringify!(#q_schedule));
-                    #(
-                        {
-                            let _sys_guard = Self::on_system_start(
-                                stringify!(#q_schedule),
-                                stringify!(#types),
-                                stringify!(#q_system),
-                            );
-                            self.#fields.#q_system(sd);
-                        }
-                    )*
+            if IS_PARALLEL {
+                quote! {
+                    #[inline(always)]
+                    fn #q_group(&mut self, sd: &SD) {
+                        rayon::scope(|s| {
+                            #(
+                                s.spawn(|_| {
+                                    let _sys_guard = Self::on_system_start(
+                                        stringify!(#q_schedule),
+                                        stringify!(#types),
+                                        stringify!(#q_system),
+                                    );
+                                    self.#fields.#q_system(sd);
+                                });
+                            )*
+                        });
+                    }
+                }
+            } else {
+                quote! {
+                    #[inline(always)]
+                    fn #q_group(&mut self, sd: &SD) {
+                        let _sched_guard = Self::on_schedule_start(stringify!(#q_schedule));
+                        #(
+                            {
+                                let _sys_guard = Self::on_system_start(
+                                    stringify!(#q_schedule),
+                                    stringify!(#types),
+                                    stringify!(#q_system),
+                                );
+                                self.#fields.#q_system(sd);
+                            }
+                        )*
+                    }
                 }
             }
         }
