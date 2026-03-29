@@ -41,7 +41,7 @@ impl<SD: SharedData + CounterMemory> Plugin<SD> for ExitCounterPlugin {
     }
 
     fn exit_check(&mut self, should_exit: &mut ShouldExit, sd: &SD) {
-        if sd.get_i() >= 2 {
+        if sd.get_i() == 2 {
             should_exit.request_exit();
         }
     }
@@ -59,7 +59,7 @@ seq!(N in 1..=50 {
             Self
         }
         async fn async_update(&mut self, _sd: &SD) {
-            tokio::time::sleep(Duration::from_millis(N + 100)).await;
+            tokio::time::sleep(Duration::from_millis(10)).await;
         }
     }
 });

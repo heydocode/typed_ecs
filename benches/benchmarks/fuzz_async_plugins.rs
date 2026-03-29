@@ -1,5 +1,3 @@
-use std::time::Duration;
-
 use criterion::{Criterion, criterion_group};
 use seq_macro::seq;
 use typed_ecs::macros::generate_collection;
@@ -41,7 +39,7 @@ impl<SD: SharedData + CounterMemory> Plugin<SD> for ExitCounterPlugin {
     }
 
     fn exit_check(&mut self, should_exit: &mut ShouldExit, sd: &SD) {
-        if sd.get_i() >= 10 {
+        if sd.get_i() == 2 {
             should_exit.request_exit();
         }
     }
@@ -57,9 +55,9 @@ seq!(N in 1..=100 {
         fn build() -> Self {
             Self
         }
-        
+
         async fn async_update(&mut self, _sd: &SD) {
-           tokio::time::sleep(Duration::from_millis(1)).await;
+           tokio::time::sleep(tokio::time::Duration::from_millis(10)).await;
        }
     }
 });
@@ -73,13 +71,15 @@ pub fn run_fuzzed_plugins(c: &mut Criterion) {
         generate_collection!(#(Plugin~N,)* ExitCounterPlugin);
     });
 
-    group.bench_function("fuzz_async_plugins", move |b| {
-        b.iter(|| {
-            let collection: GeneratedPluginCollection<SDimpl> = build_generated_collection();
-            rt.block_on(tokio::spawn(async {
-                App::new(collection).run().await
-            })).unwrap();
-        });
+    group.bench_function("fuzz_async_plugins", |b| {
+        b.to_async(tokio::runtime::Runtime::new().unwrap())
+            .iter(|| async {
+                let collection: GeneratedPluginCollection<SDimpl> = build_generated_collection();
+
+                App::new(collection).run().await;
+
+                std::hint::black_box(())
+            });
     });
 
     group.finish();

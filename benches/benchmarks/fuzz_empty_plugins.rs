@@ -39,7 +39,7 @@ impl<SD: SharedData + CounterMemory> Plugin<SD> for ExitCounterPlugin {
     }
 
     fn exit_check(&mut self, should_exit: &mut ShouldExit, sd: &SD) {
-        if sd.get_i() >= 100 {
+        if sd.get_i() == 2 {
             should_exit.request_exit();
         }
     }
@@ -69,12 +69,14 @@ pub fn run_fuzzed_plugins(c: &mut Criterion) {
     });
 
     group.bench_function("fuzz_empty_plugins", move |b| {
-        b.iter(|| {
-            let collection: GeneratedPluginCollection<SDimpl> = build_generated_collection();
-            rt.block_on(tokio::spawn(async {
-                App::new(collection).run().await
-            })).unwrap();
-        });
+        b.to_async(tokio::runtime::Runtime::new().unwrap())
+            .iter(|| async {
+                let collection: GeneratedPluginCollection<SDimpl> = build_generated_collection();
+
+                App::new(collection).run().await;
+
+                std::hint::black_box(())
+            });
     });
 
     group.finish();

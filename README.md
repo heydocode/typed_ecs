@@ -85,15 +85,6 @@ Backends where some span data is lost and therefore unusable with `typed_ecs` (c
 You can run these benchmarks with `cargo bench`. If you wish profiling the benches, you may
 want to enable a profiler via a dedicated feature (`profile-tracy` for Tracy or `profile-forest` for a TUI profiler).
 
-After the benches, you should see an html report at `target/criterion/report/index.html`.
-
-If you don't see it, try cleaning the building artefacts and re-benching a few times:
-
-```sh
-cargo clean
-cargo bench
-``` 
-
 ## Contributing
 
 We welcome contributions! Whether you're interested in:
