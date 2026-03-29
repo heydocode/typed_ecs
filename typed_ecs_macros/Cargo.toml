@@ -13,6 +13,9 @@ publish = true
 [lib]
 proc-macro = true
 
+[features]
+parallel = []
+
 [dependencies]
 proc-macro2 = "1.0.106"
 quote = "1.0.45"

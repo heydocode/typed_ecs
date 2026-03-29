@@ -53,7 +53,7 @@
 ///     app.build().run();
 /// }
 /// ```
-pub trait SharedData {
+pub trait SharedData: Sync {
     fn build() -> Self;
 }
 

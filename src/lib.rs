@@ -1,11 +1,5 @@
 #![no_std]
 
-#[cfg(feature = "std")]
-extern crate std;
-
-#[cfg(all(feature = "std", feature = "no-std"))]
-compile_error!("You must never enable both `std` and `no-std` at once!");
-
 pub mod app;
 pub mod executor;
 pub mod guard;
@@ -17,3 +11,5 @@ pub mod shared_data;
 
 pub use futures;
 pub use typed_ecs_macros as macros;
+#[cfg(feature = "parallel")]
+pub use rayon;

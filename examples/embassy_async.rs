@@ -1,5 +1,7 @@
+use std::process::exit;
+
+use embassy_time::Timer;
 use seq_macro::seq;
-use std::time::Duration;
 use typed_ecs::macros::generate_collection;
 #[cfg(feature = "profile")]
 use typed_ecs::profile::setup_default_profiling;
@@ -59,16 +61,21 @@ seq!(N in 1..=50 {
             Self
         }
         async fn async_update(&mut self, _sd: &SD) {
-            tokio::time::sleep(Duration::from_secs(1)).await;
+            Timer::after_secs(1).await;
         }
     }
 });
 
-#[tokio::main]
-async fn main() {
+#[embassy_executor::main]
+async fn main(s: embassy_executor::Spawner) {
+    s.spawn(app_run().unwrap());
+}
+
+#[embassy_executor::task]
+async fn app_run() {
     #[cfg(feature = "profile")]
     setup_default_profiling();
-
+    
     seq!(N in 1..=50 {
         generate_collection!(#(Plugin~N,)* ExitCounterPlugin);
     });
@@ -76,4 +83,9 @@ async fn main() {
     let collection: GeneratedPluginCollection<SDimpl> = build_generated_collection();
 
     App::new(collection).run().await;
+    
+    println!("App terminated!");
+    
+    // By default, embassy will continue to execute, waiting for new tasks or sleeping
+    exit(0);
 }

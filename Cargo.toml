@@ -12,56 +12,68 @@ keywords = ["ecs", "no-std", "no-alloc", "typed", "embedded"]
 # I think I need help categorizing this crate... Please open an issue if you will doing so...
 # The thing is that this crate is very suitable for literally everything where developers are
 # used to Rust's features (traits, generics, ...).
-# 
-# - memory management because that's up to the plugin's developer to design the memory space 
+#
+# - memory management because that's up to the plugin's developer to design the memory space
 # its plugin will use (in a SharedData supertrait constraint)
-# 
-# - devtools because this allows to organize plugins possibly across various codebases into one 
+#
+# - devtools because this allows to organize plugins possibly across various codebases into one
 # App, with aggressive optimizations and extreme cache locality (= performance), and there are
 # also built-in profilers for optimizing & analysis purposes.
-# 
-# - game-engines because this project has so much potential in this area, 
+#
+# - game-engines because this project has so much potential in this area,
 # btw I plan creating a game engine using this ecs
-categories = ["no-std", "embedded", "memory-management", "development-tools", "game-engines"]
+categories = [
+  "no-std",
+  "embedded",
+  "memory-management",
+  "development-tools",
+  "game-engines",
+]
 publish = true
 
 [workspace]
 members = ["typed_ecs_macros"]
 
 [features]
-default = ["std"]
-std = []
-no-std = ["dep:embassy-executor"]
+default = ["parallel"]
+parallel = ["typed_ecs_macros/parallel", "dep:rayon"]
 profile = ["dep:tracing"]
-
 profile-tracy = ["profile", "dep:tracing-subscriber", "dep:tracing-tracy"]
-
 profile-forest = ["profile", "dep:tracing-subscriber", "dep:tracing-forest"]
 
 [dependencies]
 # 2 public macro re-exports
 typed_ecs_macros = { version = "0.0.2", path = "typed_ecs_macros" }
 futures = { version = "0.3.32", default-features = false, features = [
-    "async-await"
-]}
+  "async-await",
+] }
 # 3 profiling crates; not included by default
 tracing = { version = "0.1", default-features = false, optional = true }
-embassy-executor = { version = "0.9.1", optional = true }
 tracing-subscriber = { version = "0.3.22", optional = true }
 tracing-tracy = { version = "0.11.4", optional = true, features = [
   "flush-on-exit",
 ] }
 tracing-forest = { version = "0.3.1", optional = true, features = ["full"] }
+rayon = { version = "1.11.0", optional = true }
 
 [dev-dependencies]
 seq-macro = "0.3.6"
 criterion = { version = "0.8.2", features = ["async_tokio"] }
 tokio = { version = "1", features = ["full"] }
+embassy-executor = { version = "0.10.0", default-features = false, features = [
+  "platform-std",
+  "executor-thread",
+] }
+embassy-time = { version = "0.5.1", features = ["std"] }
 
 [[example]]
 name = "profile"
 required-features = ["profile"]
 path = "examples/profile.rs"
+
+[[example]]
+name = "parallel"
+required-features = ["parallel"]
 
 [[bench]]
 name = "bench_main"
