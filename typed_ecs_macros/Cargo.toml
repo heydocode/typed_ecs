@@ -1,6 +1,6 @@
 [package]
 name = "typed_ecs_macros"
-version = "0.0.2"
+version = "0.0.3"
 edition = "2024"
 description = "Procedural macros for `typed_ecs`"
 documentation = "https://docs.rs/typed_ecs_macros"

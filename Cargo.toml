@@ -1,6 +1,6 @@
 [package]
 name = "typed_ecs"
-version = "0.0.2"
+version = "0.0.3"
 edition = "2024"
 description = "A no_std, no_alloc ECS with compile-time guarantees, and BLAZING PERFORMANCE!"
 authors = ["heydocode"]
@@ -43,7 +43,7 @@ profile-forest = ["profile", "dep:tracing-subscriber", "dep:tracing-forest"]
 
 [dependencies]
 # 2 public macro re-exports
-typed_ecs_macros = { version = "0.0.2", path = "typed_ecs_macros" }
+typed_ecs_macros = { version = "0.0.3", path = "typed_ecs_macros" }
 futures = { version = "0.3.32", default-features = false, features = [
   "async-await",
 ] }
