@@ -45,11 +45,6 @@ Check the `examples/` directory for more comprehensive examples, including:
 - `plugin_collection.rs`: Explanation of how to build a plugin collection
 - `profile.rs`: Usage of the crate's built-in profiling
 
-## Compile time optimizations demonstration
-
-You may yourself test how `typed_ecs` examples produce neat, highly optimized
-assembly, by going to [this link](https://godbolt.org/z/1KeTjExh3) (Godbolt).
-
 ## Profiling with [`tracing`](https://github.com/tokio-rs/tracing)
 
 ### Example
