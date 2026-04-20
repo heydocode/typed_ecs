@@ -36,10 +36,12 @@ members = ["typed_ecs_macros"]
 
 [features]
 default = ["parallel"]
-parallel = ["typed_ecs_macros/parallel", "dep:rayon"]
+parallel = ["typed_ecs_macros/parallel", "dep:rayon", "std"]
+parallel-global-pool = ["parallel"]
 profile = ["dep:tracing"]
 profile-tracy = ["profile", "dep:tracing-subscriber", "dep:tracing-tracy"]
 profile-forest = ["profile", "dep:tracing-subscriber", "dep:tracing-forest"]
+std = []
 
 [dependencies]
 # 2 public macro re-exports

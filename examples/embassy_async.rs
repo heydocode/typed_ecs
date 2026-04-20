@@ -3,10 +3,8 @@ use std::process::exit;
 use embassy_time::Timer;
 use seq_macro::seq;
 use typed_ecs::macros::generate_collection;
-#[cfg(feature = "profile")]
-use typed_ecs::profile::setup_default_profiling;
 use typed_ecs::{
-    app::{App, ShouldExit},
+    app::{App,},
     plugin::Plugin,
     shared_data::SharedData,
 };
@@ -42,9 +40,9 @@ impl<SD: SharedData + CounterMemory> Plugin<SD> for ExitCounterPlugin {
         Self
     }
 
-    fn exit_check(&mut self, should_exit: &mut ShouldExit, sd: &SD) {
+    fn exit_check(&mut self, should_exit: &mut bool, sd: &SD) {
         if sd.get_i() == 2 {
-            should_exit.request_exit();
+            *should_exit = true;
         }
     }
 
@@ -68,14 +66,14 @@ seq!(N in 1..=50 {
 
 #[embassy_executor::main]
 async fn main(s: embassy_executor::Spawner) {
+    #[cfg(feature = "profile")]
+    typed_ecs::profile::setup_default_profiling();
+    
     s.spawn(app_run().unwrap());
 }
 
 #[embassy_executor::task]
 async fn app_run() {
-    #[cfg(feature = "profile")]
-    setup_default_profiling();
-    
     seq!(N in 1..=50 {
         generate_collection!(#(Plugin~N,)* ExitCounterPlugin);
     });

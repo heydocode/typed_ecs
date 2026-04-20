@@ -1,3 +1,5 @@
+pub use tracing;
+
 /// Sets up a global default subscriber, chosen with enabled features
 /// You must not set another global default subscriber, or else the
 /// program can either crash, either ignore the second init.

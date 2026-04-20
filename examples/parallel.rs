@@ -1,60 +1,29 @@
 use seq_macro::seq;
+use typed_ecs::shared_data::PhantomSharedData;
 use std::{thread::sleep, time::Duration};
 use typed_ecs::macros::generate_collection;
-#[cfg(feature = "profile")]
-use typed_ecs::profile::setup_default_profiling;
 use typed_ecs::{
-    app::{App, ShouldExit},
+    app::{App, },
     plugin::Plugin,
     shared_data::SharedData,
 };
 
-trait CounterMemory {
-    fn get_i(&self) -> u128;
-    fn increment_i(&mut self);
-}
-
-struct SDimpl {
-    i: u128,
-}
-
-impl SharedData for SDimpl {
-    fn build() -> Self {
-        Self { i: 0 }
-    }
-}
-
-impl CounterMemory for SDimpl {
-    fn get_i(&self) -> u128 {
-        self.i
-    }
-    fn increment_i(&mut self) {
-        self.i += 1;
-    }
-}
-
 struct ExitCounterPlugin;
 
-impl<SD: SharedData + CounterMemory> Plugin<SD> for ExitCounterPlugin {
+impl<SD: SharedData> Plugin<SD> for ExitCounterPlugin {
     fn build() -> Self {
         Self
     }
 
-    fn exit_check(&mut self, should_exit: &mut ShouldExit, sd: &SD) {
-        if sd.get_i() == 2 {
-            should_exit.request_exit();
-        }
-    }
-
-    fn apply_update(&mut self, sd: &mut SD) {
-        sd.increment_i();
+    fn exit_check(&mut self, should_exit: &mut bool, sd: &SD) {
+        *should_exit = true;
     }
 }
 
 seq!(N in 1..=50 {
     struct Plugin~N;
 
-    impl<SD: SharedData + CounterMemory> Plugin<SD> for Plugin~N {
+    impl<SD: SharedData> Plugin<SD> for Plugin~N {
         fn build() -> Self {
             Self
         }
@@ -67,13 +36,13 @@ seq!(N in 1..=50 {
 #[tokio::main]
 async fn main() {
     #[cfg(feature = "profile")]
-    setup_default_profiling();
+    typed_ecs::profile::setup_default_profiling();
 
     seq!(N in 1..=50 {
         generate_collection!(#(Plugin~N,)* ExitCounterPlugin);
     });
 
-    let collection: GeneratedPluginCollection<SDimpl> = build_generated_collection();
+    let collection: GeneratedPluginCollection<PhantomSharedData> = build_generated_collection();
 
     App::new(collection).run().await;
 }

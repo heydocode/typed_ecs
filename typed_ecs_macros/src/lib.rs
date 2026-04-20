@@ -1,6 +1,11 @@
 mod generate_collection;
 mod schedule_contents;
 
+#[cfg(feature = "parallel")]
+pub(crate) const IS_PARALLEL: bool = true;
+#[cfg(not(feature = "parallel"))]
+pub(crate) const IS_PARALLEL: bool = false;
+
 use proc_macro::TokenStream;
 use quote::quote;
 

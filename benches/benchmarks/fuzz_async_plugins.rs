@@ -2,7 +2,7 @@ use criterion::{Criterion, criterion_group};
 use seq_macro::seq;
 use typed_ecs::macros::generate_collection;
 use typed_ecs::{
-    app::{App, ShouldExit},
+    app::App,
     plugin::Plugin,
     shared_data::SharedData,
 };
@@ -38,9 +38,9 @@ impl<SD: SharedData + CounterMemory> Plugin<SD> for ExitCounterPlugin {
         Self
     }
 
-    fn exit_check(&mut self, should_exit: &mut ShouldExit, sd: &SD) {
+    fn exit_check(&mut self, should_exit: &mut bool, sd: &SD) {
         if sd.get_i() == 2 {
-            should_exit.request_exit();
+            *should_exit = true;
         }
     }
 

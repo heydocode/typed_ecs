@@ -7,11 +7,6 @@ pub(crate) fn generate_schedule(
     schedule_name: &'static str,
     system_name: &'static str,
 ) -> TokenStream {
-    #[cfg(feature = "parallel")]
-    const IS_PARALLEL: bool = true;
-    #[cfg(not(feature = "parallel"))]
-    const IS_PARALLEL: bool = false;
-
     let system_group_name = format!("{}_all", system_name);
     let is_async = system_name.starts_with("async_");
     let is_mut = system_name.contains("apply");
@@ -51,7 +46,7 @@ pub(crate) fn generate_schedule(
         if exit_check {
             quote! {
                 #[inline(always)]
-                fn #q_group(&mut self, should_exit: &mut ::typed_ecs::app::ShouldExit, sd: &SD) {
+                fn #q_group(&mut self, should_exit: &mut bool, sd: &SD) {
                     let _sched_guard = Self::on_schedule_start(stringify!(#q_schedule));
                     #(
                         {
@@ -83,7 +78,7 @@ pub(crate) fn generate_schedule(
                 }
             }
         } else {
-            if IS_PARALLEL {
+            if crate::IS_PARALLEL {
                 quote! {
                     #[inline(always)]
                     fn #q_group(&mut self, sd: &SD) {

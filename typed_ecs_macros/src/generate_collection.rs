@@ -23,7 +23,6 @@ pub(crate) fn generate_plugin_collection_impl(
         "ApplyAsyncUpdate",
         "ExitCheck",
         "OnExit",
-        "AsyncOnExit",
     ];
 
     let systems: &[&'static str] = &[
@@ -41,7 +40,6 @@ pub(crate) fn generate_plugin_collection_impl(
         "apply_async_update",
         "exit_check",
         "on_exit",
-        "async_on_exit",
     ];
 
     let mut impl_contents = quote! {};
@@ -55,6 +53,8 @@ pub(crate) fn generate_plugin_collection_impl(
             #generated_schedule
         }
     }
+    
+    let plugin_num: usize = types.len();
 
     let expanded = quote! {
         pub struct GeneratedPluginCollection<SD> {
@@ -69,6 +69,8 @@ pub(crate) fn generate_plugin_collection_impl(
         // lazy trait evaluation.
         #( #types: ::typed_ecs::plugin::Plugin<SD>, )*
         {
+            const PLUGIN_NUM: usize = #plugin_num;
+            
             #impl_contents
         }
 
