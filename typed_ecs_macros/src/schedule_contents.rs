@@ -46,7 +46,7 @@ pub(crate) fn generate_schedule(
         if exit_check {
             quote! {
                 #[inline(always)]
-                fn #q_group(&mut self, should_exit: &mut bool, sd: &SD) {
+                fn #q_group<S: ::typed_ecs::should_exit::ShouldExit>(&mut self, should_exit: &mut S, sd: &SD) {
                     let _sched_guard = Self::on_schedule_start(stringify!(#q_schedule));
                     #(
                         {

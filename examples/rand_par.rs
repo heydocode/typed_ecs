@@ -1,4 +1,6 @@
+use rand::random_range;
 use seq_macro::seq;
+use typed_ecs::should_exit::ShouldExit;
 use std::{thread::sleep, time::Duration};
 use typed_ecs::macros::generate_collection;
 use typed_ecs::shared_data::PhantomSharedData;
@@ -11,12 +13,12 @@ impl<SD: SharedData> Plugin<SD> for ExitCounterPlugin {
         Self
     }
 
-    fn exit_check(&mut self, should_exit: &mut bool, sd: &SD) {
-        *should_exit = true;
+    fn exit_check<S: ShouldExit>(&mut self, should_exit: &mut S, _sd: &SD) {
+        should_exit.request_exit();
     }
 }
 
-seq!(N in 1..=50 {
+seq!(N in 1..=250 {
     struct Plugin~N;
 
     impl<SD: SharedData> Plugin<SD> for Plugin~N {
@@ -24,7 +26,7 @@ seq!(N in 1..=50 {
             Self
         }
         fn update(&mut self, _sd: &SD) {
-            sleep(Duration::from_secs(1));
+            sleep(Duration::from_millis(random_range(0..300)));
         }
     }
 });
@@ -34,7 +36,7 @@ async fn main() {
     #[cfg(feature = "profile")]
     typed_ecs::profile::setup_default_profiling();
 
-    seq!(N in 1..=50 {
+    seq!(N in 1..=250 {
         generate_collection!(#(Plugin~N,)* ExitCounterPlugin);
     });
 

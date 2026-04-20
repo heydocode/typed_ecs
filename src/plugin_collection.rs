@@ -1,6 +1,6 @@
 #![allow(async_fn_in_trait)]
 
-use crate::shared_data::SharedData;
+use crate::{shared_data::SharedData, should_exit::ShouldExit};
 
 /// The generated PluginCollection implements this trait. The SharedData
 /// constraints are local to each plugin, and the SharedData of the collection
@@ -11,7 +11,7 @@ use crate::shared_data::SharedData;
 /// break the program!
 pub trait PluginCollection<SD: SharedData> {
     const PLUGIN_NUM: usize;
-    
+
     // STARTUP
     fn startup_all(&mut self, _sd: &SD);
     fn apply_startup_all(&mut self, _sd: &mut SD);
@@ -33,7 +33,7 @@ pub trait PluginCollection<SD: SharedData> {
     async fn async_update_all(&mut self, _sd: &SD);
     fn apply_async_update_all(&mut self, _sd: &mut SD);
 
-    fn exit_check_all(&mut self, _should_exit: &mut bool, _sd: &SD);
+    fn exit_check_all<S: ShouldExit>(&mut self, _should_exit: &mut S, _sd: &SD);
 
     // SHUTDOWN (runs once)
 

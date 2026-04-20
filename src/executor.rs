@@ -1,6 +1,9 @@
 #![allow(async_fn_in_trait)]
 
-use crate::{app::App, plugin_collection::PluginCollection, shared_data::SharedData};
+#[cfg(feature = "profile")]
+use tracing::trace;
+
+use crate::{app::App, plugin_collection::PluginCollection, shared_data::SharedData, should_exit::ShouldExit};
 
 pub struct DefaultExecutor;
 
@@ -16,7 +19,7 @@ impl ExecutorTrait for DefaultExecutor {
 
         #[cfg(all(feature = "parallel-global-pool", debug_assertions))]
         if rayon::ThreadPoolBuilder::new()
-            .num_threads(PC::PLUGIN_NUM)
+            // .num_threads(PC::PLUGIN_NUM)
             .thread_name(|i| std::format!("ecs-worker-{i}"))
             .build_global()
             .is_err()
@@ -27,7 +30,7 @@ impl ExecutorTrait for DefaultExecutor {
         // If not in build with dbg assertions, silently fail
         #[cfg(all(feature = "parallel-global-pool", not(debug_assertions)))]
         let _ = rayon::ThreadPoolBuilder::new()
-            .num_threads(PC::PLUGIN_NUM)
+            // .num_threads(PC::PLUGIN_NUM)
             .thread_name(|i| std::format!("ecs-worker-{i}"))
             .build_global();
 
@@ -56,7 +59,7 @@ impl ExecutorTrait for DefaultExecutor {
             app.plugin_collection
                 .exit_check_all(&mut should_exit, &app.shared_data);
 
-            if should_exit {
+            if should_exit.is_true() {
                 break;
             }
 

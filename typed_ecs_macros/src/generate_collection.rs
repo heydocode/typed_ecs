@@ -53,7 +53,7 @@ pub(crate) fn generate_plugin_collection_impl(
             #generated_schedule
         }
     }
-    
+
     let plugin_num: usize = types.len();
 
     let expanded = quote! {
@@ -70,7 +70,7 @@ pub(crate) fn generate_plugin_collection_impl(
         #( #types: ::typed_ecs::plugin::Plugin<SD>, )*
         {
             const PLUGIN_NUM: usize = #plugin_num;
-            
+
             #impl_contents
         }
 

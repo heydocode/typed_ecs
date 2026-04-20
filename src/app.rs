@@ -1,5 +1,8 @@
 use core::marker::PhantomData;
 
+#[cfg(feature = "profile")]
+use tracing::trace;
+
 use crate::executor::{DefaultExecutor, ExecutorTrait};
 
 use crate::{plugin_collection::PluginCollection, shared_data::SharedData};
@@ -31,6 +34,8 @@ impl<SD: SharedData, PC: PluginCollection<SD>, Executor: ExecutorTrait> App<SD, 
     }
 
     pub async fn run(&mut self) {
+        #[cfg(feature = "profile")]
+        let _guard = tracing::info_span!("Executor Runtime").entered();
         let mut executor = Executor::init();
         executor.run(self).await;
     }
@@ -40,6 +45,8 @@ impl<SD: SharedData, PC: PluginCollection<SD>, Executor: ExecutorTrait> Drop
     for App<SD, PC, Executor>
 {
     fn drop(&mut self) {
+        #[cfg(feature = "profile")]
+        let _guard = tracing::info_span!("Executor OnExit hooks").entered();
         self.plugin_collection.on_exit_all(&self.shared_data);
     }
 }

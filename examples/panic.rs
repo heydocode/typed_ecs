@@ -1,4 +1,4 @@
-use std::{hint::black_box, thread::sleep, time::Duration};
+use std::{thread::sleep, time::Duration};
 
 use typed_ecs::{
     app::App,
@@ -15,7 +15,7 @@ impl<SD: SharedData> Plugin<SD> for PanicPlugin {
     }
 
     fn post_update(&mut self, _sd: &SD) {
-            panic!("Panicking...");
+        panic!("Panicking...");
     }
 
     fn on_exit(&mut self, _sd: &SD) {
@@ -31,7 +31,7 @@ impl<SD: SharedData> Plugin<SD> for PanicPlugin {
 async fn main() {
     #[cfg(feature = "profile")]
     typed_ecs::profile::setup_default_profiling();
-    
+
     generate_collection!(PanicPlugin);
     let collection: GeneratedPluginCollection<PhantomSharedData> = build_generated_collection();
     App::new(collection).run().await;

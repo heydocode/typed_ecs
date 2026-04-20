@@ -35,7 +35,7 @@ publish = true
 members = ["typed_ecs_macros"]
 
 [features]
-default = ["parallel"]
+default = []
 parallel = ["typed_ecs_macros/parallel", "dep:rayon", "std"]
 parallel-global-pool = ["parallel"]
 profile = ["dep:tracing"]
@@ -67,6 +67,7 @@ embassy-executor = { version = "0.10.0", default-features = false, features = [
   "executor-thread",
 ] }
 embassy-time = { version = "0.5.1", features = ["std"] }
+rand = "*"
 
 [[example]]
 name = "profile"

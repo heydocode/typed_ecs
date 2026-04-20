@@ -1,10 +1,9 @@
 use std::{thread::sleep, time::Duration};
 
 use typed_ecs::{
-    app::{App, ShouldExit},
+    app::App,
     macros::generate_collection,
     plugin::Plugin,
-    plugin_collection::PluginCollection,
     profile::setup_default_profiling,
     shared_data::SharedData,
 };
@@ -80,9 +79,9 @@ impl<SD: SharedData + AdditionalRequirement> Plugin<SD> for CtrlCHandler {
     fn build() -> Self {
         Self
     }
-    fn exit_check(&mut self, should_exit: &mut ShouldExit, sd: &SD) {
+    fn exit_check(&mut self, should_exit: &mut bool, sd: &SD) {
         if sd.get_i() >= 100 {
-            should_exit.request_exit();
+            *should_exit = true;
         }
     }
 }

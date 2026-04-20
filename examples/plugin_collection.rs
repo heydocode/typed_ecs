@@ -1,9 +1,4 @@
-use typed_ecs::{
-    app::{App,},
-    macros::generate_collection,
-    plugin::Plugin,
-    shared_data::SharedData,
-};
+use typed_ecs::{app::App, macros::generate_collection, plugin::Plugin, shared_data::SharedData, should_exit::ShouldExit};
 
 struct Plugin1;
 impl<SD: SharedData> Plugin<SD> for Plugin1 {
@@ -78,9 +73,9 @@ impl<SD: SharedData + AdditionalRequirement> Plugin<SD> for CtrlCHandler {
     fn build() -> Self {
         Self
     }
-    fn exit_check(&mut self, should_exit: &mut bool, sd: &SD) {
+    fn exit_check<S: ShouldExit>(&mut self, should_exit: &mut S, sd: &SD) {
         if sd.get_i() >= 100 {
-            *should_exit = true;
+            should_exit.request_exit();
         }
     }
 }
@@ -122,7 +117,7 @@ impl AdditionalRequirement for SDimpl {
 async fn main() {
     #[cfg(feature = "profile")]
     typed_ecs::profile::setup_default_profiling();
-    
+
     generate_collection!(CtrlCHandler, Plugin1, Plugin2, Plugin3, Plugin4);
     // This is indeed a constant! A ZST, assembling multiple plugins into one scheduled runtime.
     // Note that you can define it like `let collection: ...`, a constant is there only to show that

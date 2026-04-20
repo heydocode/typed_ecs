@@ -1,11 +1,8 @@
 use criterion::{Criterion, criterion_group};
 use seq_macro::seq;
 use typed_ecs::macros::generate_collection;
-use typed_ecs::{
-    app::App,
-    plugin::Plugin,
-    shared_data::SharedData,
-};
+use typed_ecs::should_exit::ShouldExit;
+use typed_ecs::{app::App, plugin::Plugin, shared_data::SharedData};
 
 trait CounterMemory {
     fn get_i(&self) -> u128;
@@ -38,9 +35,9 @@ impl<SD: SharedData + CounterMemory> Plugin<SD> for ExitCounterPlugin {
         Self
     }
 
-    fn exit_check(&mut self, should_exit: &mut bool, sd: &SD) {
+    fn exit_check<S: ShouldExit>(&mut self, should_exit: &mut S, sd: &SD) {
         if sd.get_i() == 2 {
-            *should_exit = true;
+            should_exit.request_exit();
         }
     }
 
@@ -57,7 +54,6 @@ seq!(N in 1..=100 {
         }
     }
 });
-
 
 pub fn run_fuzzed_plugins(c: &mut Criterion) {
     let rt = tokio::runtime::Runtime::new().unwrap();

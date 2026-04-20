@@ -3,11 +3,8 @@ use std::process::exit;
 use embassy_time::Timer;
 use seq_macro::seq;
 use typed_ecs::macros::generate_collection;
-use typed_ecs::{
-    app::{App,},
-    plugin::Plugin,
-    shared_data::SharedData,
-};
+use typed_ecs::should_exit::ShouldExit;
+use typed_ecs::{app::App, plugin::Plugin, shared_data::SharedData};
 
 trait CounterMemory {
     fn get_i(&self) -> u128;
@@ -40,9 +37,9 @@ impl<SD: SharedData + CounterMemory> Plugin<SD> for ExitCounterPlugin {
         Self
     }
 
-    fn exit_check(&mut self, should_exit: &mut bool, sd: &SD) {
+    fn exit_check<S: ShouldExit>(&mut self, should_exit: &mut S, sd: &SD) {
         if sd.get_i() == 2 {
-            *should_exit = true;
+            should_exit.request_exit();
         }
     }
 
@@ -68,7 +65,7 @@ seq!(N in 1..=50 {
 async fn main(s: embassy_executor::Spawner) {
     #[cfg(feature = "profile")]
     typed_ecs::profile::setup_default_profiling();
-    
+
     s.spawn(app_run().unwrap());
 }
 
@@ -81,9 +78,9 @@ async fn app_run() {
     let collection: GeneratedPluginCollection<SDimpl> = build_generated_collection();
 
     App::new(collection).run().await;
-    
+
     println!("App terminated!");
-    
+
     // By default, embassy will continue to execute, waiting for new tasks or sleeping
     exit(0);
 }
